@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">爱车保养</string>
+    
+    <!-- 车辆 -->
+    <string name="vehicle_list">我的车辆</string>
+    <string name="add_vehicle">添加车辆</string>
+    <string name="edit_vehicle">编辑车辆</string>
+    <string name="vehicle_brand">品牌</string>
+    <string name="vehicle_model">车型</string>
+    <string name="vehicle_plate">车牌号</string>
+    <string name="vehicle_purchase_date">购置日期</string>
+    <string name="vehicle_no_data">还没有添加车辆，点击右下角按钮添加吧</string>
+    
+    <!-- 保养记录 -->
+    <string name="maintenance_list">保养记录</string>
+    <string name="add_maintenance">添加保养记录</string>
+    <string name="edit_maintenance">编辑保养记录</string>
+    <string name="maintenance_date">保养日期</string>
+    <string name="maintenance_mileage">公里数 (km)</string>
+    <string name="maintenance_items">保养项目</string>
+    <string name="maintenance_cost">保养费用 (元)</string>
+    <string name="maintenance_location">保养地点</string>
+    <string name="maintenance_notes">备注</string>
+    
+    <!-- 零配件 -->
+    <string name="parts_name">零配件名称</string>
+    <string name="parts_quantity">数量</string>
+    <string name="parts_cost">费用</string>
+    <string name="parts_search">搜索零配件</string>
+    <string name="parts_select_or_input">选择或输入零配件</string>
+    <string name="parts_no_history">暂无历史记录</string>
+    
+    <!-- 保养地点 -->
+    <string name="location_4s">4S店</string>
+    <string name="location_repair_shop">修理厂</string>
+    <string name="location_tuhu">途虎养车</string>
+    <string name="location_self">自己动手</string>
+    <string name="location_custom">自定义</string>
+    
+    <!-- 通用 -->
+    <string name="save">保存</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="search">搜索</string>
+    <string name="back">返回</string>
+    <string name="empty">暂无数据</string>
+    <string name="loading">加载中...</string>
+    
+    <!-- 设置 -->
+    <string name="settings">设置</string>
+    <string name="settings_sync">数据同步</string>
+    <string name="settings_webdav">WebDAV 同步</string>
+    <string name="settings_webdav_url">WebDAV 地址</string>
+    <string name="settings_webdav_username">用户名</string>
+    <string name="settings_webdav_password">密码</string>
+    <string name="settings_webdav_enable">启用 WebDAV 同步</string>
+    <string name="settings_sync_now">立即同步</string>
+    <string name="settings_export">导出数据</string>
+    <string name="settings_export_csv">导出为 CSV</string>
+    <string name="settings_import">导入数据</string>
+    
+    <!-- 提示 -->
+    <string name="sync_success">同步成功</string>
+    <string name="sync_failed">同步失败</string>
+    <string name="export_success">导出成功</string>
+    <string name="export_failed">导出失败</string>
+    <string name="delete_confirm">确定要删除吗？</string>
+    <string name="field_required">此项必填</string>
+    <string name="vehicle_deleted_parts_warning">删除此车辆后，相关的保养记录和零配件历史也会一并删除</string>
+</resources>

@@ -1,0 +1,19 @@
+# Android / Gradle
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# App module
+app/build/
+app/release/
+
+# Keystore（不上传签名密钥）
+*.jks
+*.keystore
