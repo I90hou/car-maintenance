@@ -21,6 +21,9 @@ class MaintenanceRepository(
         recordDao.getRecordsByVehicleSuspend(vehicleId)
     
     suspend fun getAllRecords(): List<MaintenanceRecord> = recordDao.getAllRecords()
+
+    /** 全部记录（Flow），用于跨车辆统计与周期推算 */
+    fun getAllRecordsFlow(): Flow<List<MaintenanceRecord>> = recordDao.getAllRecordsFlow()
     
     /** 插入保养记录，同时保存地点历史 */
     suspend fun insert(record: MaintenanceRecord): Long {

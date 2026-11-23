@@ -7,6 +7,7 @@ import com.carmaintenance.app.data.AppDatabase
 import com.carmaintenance.app.data.repository.HistoryRepository
 import com.carmaintenance.app.data.repository.MaintenanceRepository
 import com.carmaintenance.app.data.repository.PartRepository
+import com.carmaintenance.app.data.repository.ServiceCycleRepository
 import com.carmaintenance.app.data.repository.VehicleRepository
 import com.carmaintenance.app.util.SyncStatusBus
 import com.carmaintenance.app.util.WebDavManager
@@ -45,6 +46,9 @@ class CarMaintenanceApp : Application() {
     lateinit var historyRepository: HistoryRepository
         private set
 
+    lateinit var serviceCycleRepository: ServiceCycleRepository
+        private set
+
     private val appScope = CoroutineScope(
         SupervisorJob() + Dispatchers.IO + CoroutineExceptionHandler { _, e ->
             Log.e(TAG, "后台任务异常（已捕获，不崩溃）: ${e.message}", e)
@@ -76,6 +80,10 @@ class CarMaintenanceApp : Application() {
             historyRepository = HistoryRepository(
                 database.partHistoryDao(),
                 database.locationHistoryDao()
+            )
+
+            serviceCycleRepository = ServiceCycleRepository(
+                database.serviceCycleRuleDao()
             )
             
             Log.d(TAG, "初始化完成")

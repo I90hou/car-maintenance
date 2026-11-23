@@ -1,31 +1,59 @@
 package com.carmaintenance.app.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import com.carmaintenance.app.data.entity.Vehicle
-import com.carmaintenance.app.ui.viewmodel.VehicleViewModel
-import com.carmaintenance.app.util.DateTimeFormatter
-import kotlinx.coroutines.launch
-import java.util.*
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.carmaintenance.app.data.entity.Vehicle
+import com.carmaintenance.app.ui.components.CockpitAlertDialog
+import com.carmaintenance.app.ui.components.CockpitCard
+import com.carmaintenance.app.ui.components.CockpitSubTopBar
+import com.carmaintenance.app.ui.components.GroupLabel
+import com.carmaintenance.app.ui.components.UnderlineField
+import com.carmaintenance.app.ui.theme.AppText
+import com.carmaintenance.app.ui.theme.Cockpit
+import com.carmaintenance.app.ui.viewmodel.VehicleViewModel
+import com.carmaintenance.app.util.DateTimeFormatter
 
 /**
- * 车辆添加/编辑界面
+ * 车辆添加 / 编辑
+ *
+ * 车牌是这张页面的主角，参数全部退成下划线输入。
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,235 +62,193 @@ fun VehicleEditScreen(
     vehicleId: Long? = null,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    
     var vehicle by remember { mutableStateOf<Vehicle?>(null) }
-    
-    // 如果是编辑模式，加载现有数据
+    val isEditMode = vehicleId != null
+
     LaunchedEffect(vehicleId) {
         if (vehicleId != null) {
             vehicle = vehicleViewModel.getVehicleByIdSync(vehicleId)
         }
     }
-    
-    var brand by remember { mutableStateOf(vehicle?.brand ?: "") }
-    var model by remember { mutableStateOf(vehicle?.model ?: "") }
-    var plateNumber by remember { mutableStateOf(vehicle?.plateNumber ?: "") }
-    var purchaseDate by remember { mutableStateOf(vehicle?.purchaseDate ?: System.currentTimeMillis()) }
+
+    var brand by remember(vehicle) { mutableStateOf(vehicle?.brand ?: "") }
+    var model by remember(vehicle) { mutableStateOf(vehicle?.model ?: "") }
+    var plateNumber by remember(vehicle) { mutableStateOf(vehicle?.plateNumber ?: "") }
+    var purchaseDate by remember(vehicle) {
+        mutableStateOf(vehicle?.purchaseDate ?: System.currentTimeMillis())
+    }
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    
-    LaunchedEffect(vehicle) {
-        vehicle?.let { loadedVehicle ->
-            brand = loadedVehicle.brand
-            model = loadedVehicle.model
-            plateNumber = loadedVehicle.plateNumber
-            purchaseDate = loadedVehicle.purchaseDate
-        }
-    }
-
     var brandError by remember { mutableStateOf(false) }
     var modelError by remember { mutableStateOf(false) }
-    
-    val isEditMode = vehicleId != null
-    
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(if (isEditMode) "编辑车辆" else "添加车辆") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
-                    }
-                }
-            )
-        }
-    ) { padding ->
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 4.dp)
+    ) {
+        CockpitSubTopBar(
+            title = if (isEditMode) "编辑车辆" else "添加车辆",
+            onBack = onBack
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 18.dp)
+                .padding(bottom = 40.dp)
         ) {
-            // 车辆图标
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                contentAlignment = Alignment.Center
+            // ===== 车牌主角 =====
+            CockpitCard(
+                modifier = Modifier.fillMaxWidth(),
+                padding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
             ) {
-                Surface(
-                    modifier = Modifier.size(80.dp),
-                    shape = MaterialTheme.shapes.large,
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.DirectionsCar,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            plateNumber.ifBlank { "未登记车牌" },
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 30.sp,
+                                letterSpacing = 1.2.sp
+                            ),
+                            color = if (plateNumber.isBlank()) Cockpit.Text3 else Cockpit.Text
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Text(
+                            listOf(brand, model)
+                                .filter { it.isNotBlank() }
+                                .joinToString(" · ")
+                                .uppercase()
+                                .ifBlank { "未填写" },
+                            style = AppText.Plate.copy(fontSize = 10.sp, letterSpacing = 2.4.sp),
+                            color = Cockpit.Text3
                         )
                     }
                 }
             }
-            
-            // 品牌输入
-            OutlinedTextField(
+
+            // ===== 车辆参数 =====
+            GroupLabel("车辆参数", modifier = Modifier.padding(top = 4.dp))
+            UnderlineField(
                 value = brand,
-                onValueChange = { 
+                onValueChange = {
                     brand = it
-                    brandError = it.isBlank()
+                    brandError = false
                 },
-                label = { Text("品牌 *") },
-                placeholder = { Text("如：丰田、大众、宝马") },
+                label = "品牌 *",
+                placeholder = "如：福特、丰田、大众",
                 isError = brandError,
-                supportingText = if (brandError) ({ Text("请输入品牌") }) else null,
-                leadingIcon = { Icon(Icons.Default.BrandingWatermark, null) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                errorText = "请输入品牌"
             )
-            
-            // 车型输入
-            OutlinedTextField(
+            Spacer(Modifier.height(18.dp))
+            UnderlineField(
                 value = model,
-                onValueChange = { 
+                onValueChange = {
                     model = it
-                    modelError = it.isBlank()
+                    modelError = false
                 },
-                label = { Text("车型 *") },
-                placeholder = { Text("如：卡罗拉、帕萨特、3系") },
+                label = "车型 *",
+                placeholder = "如：福克斯、卡罗拉、帕萨特",
                 isError = modelError,
-                supportingText = if (modelError) ({ Text("请输入车型") }) else null,
-                leadingIcon = { Icon(Icons.Default.DirectionsCar, null) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                errorText = "请输入车型"
             )
-            
-            // 车牌号
-            OutlinedTextField(
+            Spacer(Modifier.height(18.dp))
+            UnderlineField(
                 value = plateNumber,
                 onValueChange = { plateNumber = it },
-                label = { Text("车牌号") },
-                placeholder = { Text("可选，如：京A12345") },
-                leadingIcon = { Icon(Icons.Default.Badge, null) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+                label = "车牌号",
+                placeholder = "可选，如：沪A·DC"
             )
-            
-            // 购置日期
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showDatePicker = true }
-            ) {
-                OutlinedTextField(
-                    value = DateTimeFormatter.formatDate(purchaseDate),
-                    onValueChange = {},
-                    label = { Text("购置日期") },
-                    leadingIcon = { Icon(Icons.Default.CalendarMonth, null) },
-                    trailingIcon = { Icon(Icons.Default.EditCalendar, null) },
-                    readOnly = true,
-                    enabled = false,
-                    modifier = Modifier.fillMaxWidth()
+            Spacer(Modifier.height(18.dp))
+            UnderlineField(
+                value = DateTimeFormatter.formatDate(purchaseDate),
+                onValueChange = {},
+                label = "购置日期",
+                readOnly = true,
+                onClick = { showDatePicker = true },
+                trailing = {
+                    Icon(
+                        Icons.Default.CalendarMonth,
+                        contentDescription = "选择日期",
+                        modifier = Modifier.size(16.dp),
+                        tint = Cockpit.Text3
+                    )
+                }
+            )
+
+            // ===== 提示 =====
+            if (isEditMode) {
+                GroupLabel("提示")
+                Text(
+                    "删除此车辆后，相关的保养记录和零配件历史也会一并删除，该操作不可撤销。",
+                    style = AppText.Hint,
+                    color = Cockpit.Text3
                 )
+                Spacer(Modifier.height(18.dp))
             }
-            
-            Spacer(Modifier.height(16.dp))
-            
-            // 保存按钮
-            Button(
+
+            // ===== 保存 =====
+            PrimaryButton(
+                text = if (isEditMode) "保存修改" else "添加车辆",
                 onClick = {
                     brandError = brand.isBlank()
                     modelError = model.isBlank()
-                    
                     if (!brandError && !modelError) {
-                        scope.launch {
-                            if (isEditMode && vehicle != null) {
-                                vehicleViewModel.updateVehicle(
-                                    vehicle!!.copy(
-                                        brand = brand.trim(),
-                                        model = model.trim(),
-                                        plateNumber = plateNumber.trim(),
-                                        purchaseDate = purchaseDate
-                                    )
-                                )
-                            } else {
-                                vehicleViewModel.addVehicle(
+                        val current = vehicle
+                        if (isEditMode && current != null) {
+                            vehicleViewModel.updateVehicle(
+                                current.copy(
                                     brand = brand.trim(),
                                     model = model.trim(),
                                     plateNumber = plateNumber.trim(),
                                     purchaseDate = purchaseDate
                                 )
-                            }
-                            onBack()
+                            )
+                        } else {
+                            vehicleViewModel.addVehicle(
+                                brand = brand.trim(),
+                                model = model.trim(),
+                                plateNumber = plateNumber.trim(),
+                                purchaseDate = purchaseDate
+                            )
                         }
+                        onBack()
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-            ) {
-                Icon(Icons.Default.Save, null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(if (isEditMode) "保存修改" else "添加车辆")
-            }
-            
-            // 删除按钮（仅编辑模式显示）
+                modifier = Modifier.fillMaxWidth()
+            )
+
             if (isEditMode && vehicle != null) {
-                OutlinedButton(
+                Spacer(Modifier.height(10.dp))
+                DangerButton(
+                    text = "删除此车辆",
                     onClick = { showDeleteDialog = true },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(Icons.Default.Delete, null, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text("删除此车辆（同时删除所有保养记录）")
-                }
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
-    
-    // 删除确认弹窗
-    if (showDeleteDialog && vehicle != null) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("确认删除") },
-            text = { Text("确定要删除 ${vehicle!!.brand} ${vehicle!!.model} 吗？该车辆的所有保养记录也会一并删除，此操作无法恢复。") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        scope.launch {
-                            vehicleViewModel.deleteVehicle(vehicle!!)
-                            showDeleteDialog = false
-                            onBack()
-                        }
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("删除")
-                }
+
+    val deleting = vehicle
+    if (showDeleteDialog && deleting != null) {
+        CockpitAlertDialog(
+            title = "删除车辆",
+            message = "确定要删除 ${deleting.brand} ${deleting.model} 吗？该车辆的所有保养记录也会一并删除，此操作无法恢复。",
+            confirmText = "确认删除",
+            danger = true,
+            onConfirm = {
+                showDeleteDialog = false
+                vehicleViewModel.deleteVehicle(deleting)
+                onBack()
             },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("取消")
-                }
-            }
+            onDismiss = { showDeleteDialog = false }
         )
     }
-    
-    // Material3 DatePicker Dialog
+
     if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = purchaseDate
-        )
+        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = purchaseDate)
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
@@ -276,6 +262,60 @@ fun VehicleEditScreen(
             }
         ) {
             DatePicker(state = datePickerState)
+        }
+    }
+}
+
+/** 主操作按钮 */
+@Composable
+fun PrimaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.material3.Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(999.dp),
+        color = Cockpit.Accent,
+        contentColor = Cockpit.OnAccent,
+        modifier = modifier
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(vertical = 15.dp)
+        ) {
+            Text(
+                text,
+                style = MaterialTheme.typography.labelLarge,
+                color = Cockpit.OnAccent
+            )
+        }
+    }
+}
+
+/** 危险按钮：只有红边，没有填充 */
+@Composable
+fun DangerButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.material3.Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(999.dp),
+        color = androidx.compose.ui.graphics.Color.Transparent,
+        border = androidx.compose.foundation.BorderStroke(1.dp, Cockpit.Danger.copy(alpha = 0.45f)),
+        modifier = modifier
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(vertical = 15.dp)
+        ) {
+            Text(
+                text,
+                style = MaterialTheme.typography.labelLarge,
+                color = Cockpit.Danger
+            )
         }
     }
 }

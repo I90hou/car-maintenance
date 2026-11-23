@@ -7,6 +7,7 @@ import com.carmaintenance.app.CarMaintenanceApp
 import com.carmaintenance.app.data.DbMutex
 import com.carmaintenance.app.data.entity.MaintenanceRecord
 import com.carmaintenance.app.data.entity.PartItem
+import com.carmaintenance.app.data.entity.RecordType
 import com.carmaintenance.app.data.repository.MaintenanceRepository
 import com.carmaintenance.app.data.repository.PartRepository
 import kotlinx.coroutines.delay
@@ -14,8 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.isActive
@@ -25,13 +24,13 @@ import kotlinx.coroutines.sync.withLock
  * 保养记录 ViewModel
  */
 class MaintenanceViewModel : ViewModel() {
-    
+
     private val recordRepository: MaintenanceRepository = CarMaintenanceApp.instance.maintenanceRepository
     private val partRepository: PartRepository = CarMaintenanceApp.instance.partRepository
-    
+
     private val _records = MutableStateFlow<List<MaintenanceRecord>>(emptyList())
     val records: StateFlow<List<MaintenanceRecord>> = _records.asStateFlow()
-    
+
     private val _partsByRecord = MutableStateFlow<Map<Long, List<PartItem>>>(emptyMap())
     val partsByRecord: StateFlow<Map<Long, List<PartItem>>> = _partsByRecord.asStateFlow()
 
@@ -47,7 +46,7 @@ class MaintenanceViewModel : ViewModel() {
     private val partsCache = mutableMapOf<Long, Map<Long, List<PartItem>>>()
 
     /**
-     * 加载某车辆的保养记录
+     * 加载某车辆的记录
      * - 切车时先清空旧数据并进入加载态，避免残留上一辆车的内容
      * - 同时监听「记录表」和「零配件表」，任一变化都重建明细映射
      * - 读取异常时自动重试，避免列表永久空白
@@ -102,14 +101,15 @@ class MaintenanceViewModel : ViewModel() {
             _isLoading.value = false
         }
     }
-    
+
     fun getPartsForRecord(recordId: Long): List<PartItem> {
         return _partsByRecord.value[recordId] ?: emptyList()
     }
-    
-    /** 添加保养记录及零配件 */
+
+    /** 添加记录及其零配件 */
     fun addRecord(
         vehicleId: Long,
+        type: String,
         date: Long,
         mileage: Int,
         parts: List<PartItem>,
@@ -124,6 +124,7 @@ class MaintenanceViewModel : ViewModel() {
                     val totalCost = partsCost + laborCost
                     val record = MaintenanceRecord(
                         vehicleId = vehicleId,
+                        type = type,
                         date = date,
                         mileage = mileage,
                         partsCost = partsCost,
@@ -139,12 +140,12 @@ class MaintenanceViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e("MaintenanceViewModel", "保存保养记录失败: ${e.message}", e)
+                Log.e("MaintenanceViewModel", "保存记录失败: ${e.message}", e)
             }
         }
     }
-    
-    /** 更新保养记录及零配件 */
+
+    /** 更新记录及其零配件 */
     fun updateRecord(
         record: MaintenanceRecord,
         parts: List<PartItem>,
@@ -173,11 +174,11 @@ class MaintenanceViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                Log.e("MaintenanceViewModel", "更新保养记录失败: ${e.message}", e)
+                Log.e("MaintenanceViewModel", "更新记录失败: ${e.message}", e)
             }
         }
     }
-    
+
     fun deleteRecord(record: MaintenanceRecord) {
         viewModelScope.launch {
             try {
@@ -187,22 +188,27 @@ class MaintenanceViewModel : ViewModel() {
                 }
                 _partsByRecord.value = _partsByRecord.value - record.id
             } catch (e: Exception) {
-                Log.e("MaintenanceViewModel", "删除保养记录失败: ${e.message}", e)
+                Log.e("MaintenanceViewModel", "删除记录失败: ${e.message}", e)
             }
         }
     }
-    
+
     /** 获取最新公里数，用于默认值 */
-    suspend fun getLatestMileage(vehicleId: Long): Int? = 
+    suspend fun getLatestMileage(vehicleId: Long): Int? =
         recordRepository.getLatestMileage(vehicleId)
-    
+
     /** 同步获取记录 */
     fun getRecordByIdSync(id: Long): MaintenanceRecord? = runBlocking {
         recordRepository.getRecordById(id)
     }
-    
+
     /** 同步获取零配件 */
     fun getPartsByRecordSync(recordId: Long): List<PartItem> = runBlocking {
         partRepository.getPartsByRecord(recordId)
+    }
+
+    companion object {
+        /** 默认记录性质：保养 */
+        const val DEFAULT_TYPE = RecordType.SERVICE
     }
 }

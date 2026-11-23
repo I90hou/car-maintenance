@@ -259,6 +259,7 @@ class WebDavManager(
                 recordsArray.put(JSONObject().apply {
                     put("id", r.id)
                     put("vehicleId", r.vehicleId)
+                    put("type", r.type)
                     put("date", r.date)
                     put("mileage", r.mileage)
                     put("partsCost", r.partsCost)
@@ -292,6 +293,19 @@ class WebDavManager(
         }
         json.put("parts", partsArray)
 
+        // 保养周期规则
+        val rulesArray = JSONArray()
+        for (rule in db.serviceCycleRuleDao().getAllRulesSuspend()) {
+            rulesArray.put(JSONObject().apply {
+                put("id", rule.id)
+                put("partName", rule.partName)
+                put("mileageInterval", rule.mileageInterval)
+                put("monthInterval", rule.monthInterval)
+                put("updatedAt", rule.updatedAt)
+            })
+        }
+        json.put("serviceCycleRules", rulesArray)
+
         json.toString()
     }
 
@@ -306,6 +320,7 @@ class WebDavManager(
             db.partItemDao().deleteAll()
             db.maintenanceRecordDao().deleteAll()
             db.vehicleDao().deleteAll()
+            db.serviceCycleRuleDao().deleteAll()
 
         // 导入车辆
         val vehiclesArray = json.getJSONArray("vehicles")
@@ -344,6 +359,7 @@ class WebDavManager(
                 com.carmaintenance.app.data.entity.MaintenanceRecord(
                     id = rid,
                     vehicleId = vid,
+                    type = obj.optString("type", com.carmaintenance.app.data.entity.RecordType.SERVICE),
                     date = obj.getLong("date"),
                     mileage = obj.getInt("mileage"),
                     partsCost = obj.optDouble("partsCost", 0.0),
@@ -379,6 +395,30 @@ class WebDavManager(
                 )
             )
         }
+
+        // 导入保养周期规则
+        val rulesArray = json.optJSONArray("serviceCycleRules")
+        if (rulesArray != null) {
+            for (i in 0 until rulesArray.length()) {
+                val obj = rulesArray.getJSONObject(i)
+                db.serviceCycleRuleDao().insert(
+                    com.carmaintenance.app.data.entity.ServiceCycleRule(
+                        id = obj.optLong("id", 0L),
+                        partName = obj.getString("partName"),
+                        mileageInterval = obj.optInt("mileageInterval", 0),
+                        monthInterval = obj.optInt("monthInterval", 0),
+                        updatedAt = obj.optLong("updatedAt", System.currentTimeMillis())
+                    )
+                )
+            }
+        }
+        }
+
+        // 云端没有周期规则时，回填内置周期表，避免推算功能整个失效
+        if (db.serviceCycleRuleDao().getCount() == 0) {
+            com.carmaintenance.app.data.repository.ServiceCycleRepository(
+                db.serviceCycleRuleDao()
+            ).ensureDefaults()
         }
     }
 }

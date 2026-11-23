@@ -18,23 +18,25 @@ import com.carmaintenance.app.data.entity.*
         MaintenanceRecord::class,
         PartItem::class,
         PartHistory::class,
-        LocationHistory::class
+        LocationHistory::class,
+        ServiceCycleRule::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {
-    
+
     abstract fun vehicleDao(): VehicleDao
     abstract fun maintenanceRecordDao(): MaintenanceRecordDao
     abstract fun partItemDao(): PartItemDao
     abstract fun partHistoryDao(): PartHistoryDao
     abstract fun locationHistoryDao(): LocationHistoryDao
-    
+    abstract fun serviceCycleRuleDao(): ServiceCycleRuleDao
+
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
-        
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
