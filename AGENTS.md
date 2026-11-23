@@ -16,16 +16,23 @@
 - 静态检查：`./gradlew lint`
 - 单元测试：`./gradlew test`（当前仓库暂无测试源集）
 - 清理构建产物：`./gradlew clean`
+- ⚠️ **仓库里的 `gradlew` / `gradlew.bat` 是占位桩**：执行后会退出 0，但**根本没有真正编译**。
+  下结论「构建通过」之前，必须用真实 Gradle 跑一遍并看到 `BUILD SUCCESSFUL`。
+  - 本机真实 Gradle 8.9：`C:\Users\wake\.gradle\distributions\gradle-8.9\bin\gradle.bat`
+  - `JAVA_HOME` 指向 Android Studio 自带 JBR：`D:\Program Files\Android\Android Studio\jbr`
+  - PowerShell 会把 Gradle 报错行截到约 120 列，要拿完整错误需重定向到文件再看：
+    `cmd /c 'gradle.bat assembleDebug --console=plain > out.log 2> err.log'`
+  - Windows 上 `clean` 可能因模拟器或杀软占用 APK 而失败；此时直接跑 `assembleDebug` 重建即可
 
 ## 项目结构 · Project layout
 
 - `app/src/main/java/com/carmaintenance/app/data/` — Room 数据层
-  - `entity/` — 实体：Vehicle / MaintenanceRecord / PartItem / PartHistory / LocationHistory
+  - `entity/` — 实体：Vehicle / MaintenanceRecord / PartItem / PartHistory / LocationHistory / ServiceCycleRule
   - `dao/` — DAO 接口，查询返回 `Flow`
   - `repository/` — 仓库层，对 ViewModel 暴露 Flow 与 suspend 方法
   - `AppDatabase.kt` — 数据库单例（`getInstance`）；`DbMutex.kt` — 全局写锁
 - `app/src/main/java/com/carmaintenance/app/ui/` — Compose UI 层
-  - `screen/` — 页面：Home / RecordEdit / VehicleEdit / VehicleManager / Settings
+  - `screen/` — 页面：Overview / Records / RecordDetail / RecordEdit / VehicleEdit / VehicleManager / Settings
   - `viewmodel/` — ViewModel，状态用 StateFlow
   - `theme/` — Material 3 主题；`AppNavigation.kt`、`MainActivity.kt` — 导航与入口
 - `app/src/main/java/com/carmaintenance/app/util/` — 工具：WebDavManager（同步）、CsvExporter（导出）、Formatters、SyncStatusBus
