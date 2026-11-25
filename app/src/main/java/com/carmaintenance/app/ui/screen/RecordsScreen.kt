@@ -294,6 +294,22 @@ private fun TimelineRow(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
+                if (record.location.isNotBlank()) {
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "·",
+                        style = AppText.RowMeta,
+                        color = Cockpit.Text3
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        record.location,
+                        style = AppText.RowMeta,
+                        color = Cockpit.Text2,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 if (isRepair) {
                     Spacer(Modifier.width(6.dp))
                     RepairTag()
