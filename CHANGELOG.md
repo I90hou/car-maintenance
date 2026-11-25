@@ -9,6 +9,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- 自动化发布：推送 `v*` tag 即自动构建已签名的 release APK 并发布 Release，发布说明从本文件的对应版本段抽取；tag 与 `versionName` 不一致会直接中止
+
 ## [1.2.0] - 2026-11-25
 
 ### Added
