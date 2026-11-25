@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>爱车保养 · B 版「现代车座舱」</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/800.css">
+<style>
+:root{
+  --bg:#0A0C0F; --s1:#12151A; --s2:#181C22; --s3:#20252C;
+  --line:#242A32; --line2:#2F363F;
+  --txt:#EAEEF2; --txt2:#8A919B; --txt3:#5A616B;
+  --ac:#4C8DFF; --acdim:rgba(76,141,255,.15); --ok:#3DD68C; --warn:#F5A524; --dg:#FF6B6B;
+  --fs:"Manrope","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--fs);-webkit-font-smoothing:antialiased}
+.board-head{padding:34px 30px 8px;border-bottom:1px solid var(--line)}
+.tag{font:700 10px/1 var(--fs);letter-spacing:.26em;text-transform:uppercase;color:var(--ac)}
+.h1{margin:10px 0 0;font:800 29px/1.2 var(--fs);letter-spacing:-.01em}
+.sub{margin:9px 0 0;max-width:790px;color:var(--txt2);font-size:14px;line-height:1.85}
+.axis{display:flex;flex-wrap:wrap;margin-top:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--s1)}
+.axis div{flex:1 1 150px;padding:11px 14px;border-right:1px solid var(--line)}
+.axis div:last-child{border-right:0}
+.axis b{display:block;font:700 9px/1 var(--fs);letter-spacing:.2em;color:var(--txt3);margin-bottom:6px}
+.axis span{font-size:13px;color:var(--txt)}
+.swatch{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.swatch i{width:46px;height:46px;border:1px solid var(--line2);display:block;border-radius:8px}
+.swatch i b{display:block;font:700 8px/1 var(--fs);color:var(--txt3);margin-top:5px;text-align:center;font-style:normal}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(390px,1fr));gap:26px;padding:28px 30px 60px;justify-items:center}
+.cellwrap{display:flex;flex-direction:column;gap:9px;align-items:center}
+.cap{font:700 10px/1 var(--fs);letter-spacing:.22em;text-transform:uppercase;color:var(--txt3);align-self:flex-start;padding-left:4px}
+.note{max-width:390px;font-size:12px;line-height:1.75;color:var(--txt2);align-self:flex-start;padding-left:4px}
+.phone{width:390px;height:844px;border:1px solid var(--line2);border-radius:22px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 22px 50px rgba(0,0,0,.6);background:var(--bg)}
+.status{height:28px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;font:700 11px var(--fs);color:var(--txt3);background:var(--bg)}
+.body{flex:1;overflow:hidden;padding:0 18px 16px;position:relative}
+.body.hasbar{padding-bottom:134px}
+/* 可滚动长页：内容超过一屏时改用自适应长框，避免裁掉「保存」「导出」这类关键操作 */
+.phone.tall{height:auto;min-height:844px}
+.phone.tall .body{overflow:visible}
+.phone.tall .body.hasbar{padding-bottom:78px}
+
+/* ===== 悬浮主操作：电光蓝圆钮 ===== */
+.fab{position:absolute;right:14px;bottom:86px;z-index:3;display:flex;align-items:center;gap:7px;
+  padding:13px 19px;border-radius:999px;background:var(--ac);color:#fff;
+  box-shadow:0 10px 22px rgba(76,141,255,.34);font:700 12.5px/1 var(--fs);letter-spacing:.04em}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 0 14px}
+.hd .t{font:800 22px/1 var(--fs);letter-spacing:-.01em;flex:1}
+.hd .s{font:600 11px/1 var(--fs);letter-spacing:.02em;color:var(--txt3)}
+.hd .s.dangerlink{color:var(--dg);cursor:pointer}
+.dialog{position:absolute;inset:0;background:rgba(4,6,9,.58);display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
+.dialog .sheet2{width:100%;background:var(--s1);border:1px solid var(--line2);border-radius:18px;padding:20px}
+.dialog .dt2{font:800 16px/1.4 var(--fs);color:var(--txt)}
+.dialog .ds2{margin-top:10px;font:400 12.5px/1.75 var(--fs);color:var(--txt2)}
+.dialog .drow{display:flex;gap:10px;margin-top:20px}
+.dialog .drow .btn{flex:1;padding:13px}
+.back{width:34px;height:34px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;color:var(--txt2);font-size:15px;flex:none}
+.chipset{display:flex;gap:8px;overflow:hidden;margin:0 0 16px}
+.chip{font:600 12px/1 var(--fs);padding:8px 13px;border-radius:999px;border:1px solid var(--line2);color:var(--txt2);background:var(--s1);white-space:nowrap}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#06101F;font-weight:700}
+.card{background:var(--s1);border:1px solid var(--line);border-radius:20px;padding:18px}
+.plate{font:800 11px/1 var(--fs);letter-spacing:.22em;color:var(--ac)}
+.name{font:700 16px/1.2 var(--fs);margin-top:7px}
+.odo{font:800 54px/1 var(--fs);letter-spacing:-.03em;margin-top:20px}
+.odo small{font:700 14px/1 var(--fs);color:var(--txt3);margin-left:7px;letter-spacing:0}
+.stats{display:flex;gap:10px;margin-top:20px}
+.sbox{flex:1;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.sbox b{display:block;font:800 17px/1 var(--fs)}
+.sbox span{display:block;font:700 9.5px/1 var(--fs);letter-spacing:.14em;color:var(--txt3);margin-top:8px}
+.barwrap{margin-top:22px}
+.barhead{display:flex;align-items:baseline;justify-content:space-between;font:600 11px/1 var(--fs);color:var(--txt3);margin-bottom:10px}
+.barhead b{color:var(--txt);font-weight:800}
+.track{height:6px;border-radius:999px;background:var(--s3);position:relative;overflow:hidden}
+.track i{position:absolute;left:0;top:0;bottom:0;background:var(--ac);border-radius:999px}
+.track i.dg{background:var(--dg)}
+.track u{position:absolute;top:0;bottom:0;right:0;background:var(--dg);opacity:.55;border-radius:999px}
+.trackmarks{display:flex;justify-content:space-between;font:600 10px/1 var(--fs);color:var(--txt3);margin-top:9px}
+.due{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.due .dd{width:8px;height:8px;border-radius:50%;background:var(--dg);flex:none;box-shadow:0 0 12px rgba(255,107,107,.6)}
+.due .dt{flex:1;min-width:0}
+.due .dt b{display:block;font:700 14px/1.2 var(--fs)}
+.due .dt span{display:block;font:600 11px/1.4 var(--fs);color:var(--txt3);margin-top:5px}
+.due .dv{font:800 14px/1 var(--fs);color:var(--dg)}
+.tl{position:relative;padding-left:20px}
+.tl::before{content:"";position:absolute;left:4px;top:8px;bottom:8px;width:1px;background:var(--line2)}
+.tli{position:relative;padding:11px 0 13px}
+.tli::before{content:"";position:absolute;left:-19px;top:16px;width:9px;height:9px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 4px var(--bg)}
+.tli.rep::before{background:var(--dg)}
+.tli .row1{display:flex;align-items:baseline;gap:10px}
+.tli .row1 b{font:800 15px/1 var(--fs)}
+.tli .row1 span{font:600 11px/1 var(--fs);color:var(--txt3)}
+.tli .row1 .amt{margin-left:auto;font:800 14px/1 var(--fs)}
+.tli .row2{font:600 11px/1.5 var(--fs);color:var(--txt2);margin-top:7px}
+.tli .row2 em{font-style:normal;color:var(--txt3);margin:0 6px}
+.tli .row2 .del{float:right;font:600 10.5px/1 var(--fs);letter-spacing:.06em;color:var(--txt3);cursor:pointer}
+.tli .row2 .del:active{color:var(--dg)}
+.tabbar{position:absolute;left:12px;right:12px;bottom:12px;height:58px;border-radius:18px;display:flex;align-items:center;
+  background:rgba(24,28,34,.78);backdrop-filter:blur(18px);border:1px solid var(--line2)}
+.tabbar div{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font:700 9.5px/1 var(--fs);letter-spacing:.08em;color:var(--txt3)}
+.tabbar div.on{color:var(--ac)}
+.tabbar svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.6;fill:none}
+.field{border-bottom:1px solid var(--line);padding:12px 0}
+.field label{display:block;font:700 9.5px/1 var(--fs);letter-spacing:.2em;text-transform:uppercase;color:var(--txt3);margin-bottom:9px}
+.field .v{font:700 16px/1.3 var(--fs);letter-spacing:.01em}
+.field .v.cn{font-weight:700;font-size:14.5px}
+.field .v.ph{color:var(--txt3);font-weight:500}
+.field.err{border-bottom-color:var(--dg)}
+.field .msg{font:600 11px/1 var(--fs);color:var(--dg);margin-top:8px}
+.fieldrow{display:flex;gap:14px}
+.fieldrow .field{flex:1}
+.seg{display:flex;gap:8px;margin:4px 0 12px}
+.seg div{flex:1;text-align:center;padding:11px 4px;border-radius:999px;font:700 12.5px/1 var(--fs);color:var(--txt2);background:var(--s2);border:1px solid var(--line)}
+.seg div.on{background:var(--ac);border-color:var(--ac);color:#06101F}
+.hint{font:500 11.5px/1.6 var(--fs);color:var(--txt3);margin:0 0 16px}
+.items{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--s1)}
+.itemrow{display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid var(--line)}
+.itemrow:last-child{border-bottom:0}
+.itemrow .n{flex:1;font:700 13.5px/1.2 var(--fs)}
+.itemrow .n small{display:block;font:600 10.5px/1 var(--fs);color:var(--txt3);margin-top:6px}
+.itemrow .s{font:800 13.5px/1 var(--fs);color:var(--txt)}
+.itemrow .x{font:700 14px/1 var(--fs);color:var(--txt3)}
+.sum{margin-top:14px;border-radius:16px;padding:15px;background:var(--acdim);border:1px solid rgba(76,141,255,.28);display:flex;align-items:baseline;justify-content:space-between}
+.sum span{font:700 10px/1 var(--fs);letter-spacing:.2em;color:var(--txt2)}
+.sum b{font:800 20px/1 var(--fs);color:var(--ac)}
+.btn{display:block;width:100%;text-align:center;border-radius:999px;padding:15px;font:800 13px/1 var(--fs);letter-spacing:.06em;cursor:pointer;
+  background:var(--ac);color:#06101F;border:0}
+.btn.ghost{background:var(--s2);color:var(--txt);border:1px solid var(--line2)}
+.btn.danger{background:transparent;color:var(--dg);border:1px solid rgba(255,107,107,.45)}
+.btn.sm{padding:11px;font-size:12px}
+.btnrow{display:flex;gap:10px}
+.btnrow .btn{flex:1}
+.listrow{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.listrow .rt{flex:1}
+.listrow .rt b{display:block;font:700 13.5px/1.3 var(--fs)}
+.listrow .rt span{display:block;font:500 11.5px/1.4 var(--fs);color:var(--txt3);margin-top:5px}
+.toggle{width:44px;height:26px;border-radius:999px;background:var(--ac);position:relative;flex:none}
+.toggle i{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;background:#fff}
+.toggle.off{background:var(--s3)}
+.toggle.off i{right:auto;left:3px;background:var(--txt3)}
+.grp{margin:22px 0 10px;font:700 10.5px/1 var(--fs);letter-spacing:.22em;text-transform:uppercase;color:var(--txt3)}
+.grip{font:700 15px/1 var(--fs);color:var(--txt3);letter-spacing:2px}
+.idx{font:800 11px/1 var(--fs);color:var(--txt3);width:22px}
+.nextrow{display:flex;align-items:center;gap:8px;margin-top:9px}
+.nextrow .dot{width:7px;height:7px;border-radius:50%;background:var(--ac);flex:none}
+.nextrow .dot.dg{background:var(--dg)}
+.nextrow span{font:600 11px/1.4 var(--fs);color:var(--txt2)}
+.nextrow b{font-weight:800;color:var(--txt)}
+.bottom{position:absolute;left:0;right:0;bottom:0;padding:12px 18px 20px;background:var(--bg)}
+.bottom::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:36px;
+  background:linear-gradient(transparent,var(--bg));pointer-events:none}
+.lightbox{position:fixed;inset:0;background:rgba(4,6,9,.95);display:grid;place-items:center;z-index:99;padding:20px;cursor:zoom-out}
+@media (prefers-reduced-motion:no-preference){.phone:hover{transform:translateY(-3px);transition:transform .18s}}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+/* ===== 功能化：部件余量矩阵（每行 = 一个保养项目） ===== */
+.matrix{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.mxhead{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.mxhead b{font:700 10px/1 var(--fs);letter-spacing:.22em;text-transform:uppercase;color:var(--txt3)}
+.mxhead span{font:600 10px/1 var(--fs);color:var(--txt3)}
+.mxrow{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 0;
+  border-bottom:1px solid #171B20;cursor:pointer;font-family:var(--fs)}
+.mxrow:last-child{border-bottom:0}
+.mxrow .mx1{display:flex;align-items:baseline;gap:8px}
+.mxrow .mxname{font:700 13px/1.2 var(--fs)}
+.mxrow .mxval{margin-left:auto;font:800 13px/1 var(--fs)}
+.mxrow .mxval.dg{color:var(--dg)}
+.mxrow .mxval.wn{color:var(--warn)}
+.mxrow .mxsub{font:600 10.5px/1.4 var(--fs);color:var(--txt3);margin-top:5px}
+.mxbar{height:4px;border-radius:999px;background:var(--s3);margin-top:8px;overflow:hidden;position:relative}
+.mxbar i{display:block;height:100%;border-radius:999px;background:var(--ac)}
+.mxbar i.dg{background:var(--dg)}
+.mxbar i.wn{background:var(--warn)}
+.mxbar u{position:absolute;top:0;bottom:0;right:0;background:var(--dg);opacity:.55;border-radius:999px}
+.mxdot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--ok)}
+.mxdot.dg{background:var(--dg)}
+.mxdot.wn{background:var(--warn)}
+
+
+/* ===== 汽车元素：车身侧面剪影 ===== */
+.carsil{position:absolute;right:14px;top:12px;width:62px;opacity:.9;pointer-events:none}
+.card{position:relative}
+.carsil svg{width:100%;display:block}
+.carsil .body{fill:none;stroke:var(--txt3);stroke-width:1.2;stroke-linejoin:round}
+.carsil .glass{fill:none;stroke:var(--txt3);stroke-width:1;opacity:.7}
+.carsil .wheel{fill:none;stroke:var(--txt3);stroke-width:1.2}
+.carsil.on .body{stroke:var(--ac)}
+.carsil.on .wheel{stroke:var(--ac)}
+.carsil.on .glass{stroke:var(--ac);opacity:.9}
+
+/* ===== 汽车元素：状态栏连接指示 ===== */
+.status .conn{display:flex;align-items:center;gap:5px}
+.status .conn svg{width:12px;height:12px;stroke:currentColor;stroke-width:1.7;fill:none}
+.status .conn-ico{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+.status .conn-ico.dg{background:var(--dg);box-shadow:0 0 8px rgba(255,107,107,.7)}
+
+</style>
+</head>
+<body>
+
+<div class="board-head">
+  <div class="tag">Direction B · 风格：现代汽车（智能座舱）</div>
+  <h1 class="h1">现代车座舱 · 像电动车中控屏那样安静</h1>
+  <p class="sub">取材自当代电动车的数字座舱：几乎不用装饰，靠留白、发丝分隔线和一条电光蓝的强调色建立层级；数字是大屏主角，文字退到辅助位置。保养周期变成一条进度条，界面底部是玻璃质感的标签栏。</p>
+  <div class="axis">
+    <div><b>明暗</b><span>全暗 #0A0C0F</span></div>
+    <div><b>彩色</b><span>近乎无彩 + 电光蓝单一强调色</span></div>
+    <div><b>字体</b><span>Manrope（几何无衬线）+ 系统中黑</span></div>
+    <div><b>形状</b><span>大圆角 · 发丝线 · 胶囊 · 无阴影</span></div>
+    <div><b>骨架</b><span>车辆大卡 + 时间线 + 底部导航</span></div>
+    <div><b>签名</b><span>部件余量矩阵 + 玻璃标签栏</span></div>
+    <div><b>功能化</b><span>每行一个部件的剩余里程/天数，由周期推算</span></div>
+  </div>
+  <div class="swatch">
+    <i style="background:#0A0C0F"></i><i style="background:#12151A"></i><i style="background:#20252C"></i>
+    <i style="background:#4C8DFF"></i><i style="background:#3DD68C"></i><i style="background:#FF6B6B"></i>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- 01 首页 -->
+  <div class="cellwrap">
+    <div class="cap">01 · 概览 · 车辆大卡 + 余量矩阵</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span>
+        <span class="conn">
+          <span class="conn-ico dg"></span>
+          <span>1 项待保养</span>
+          <span>5G · 82%</span>
+        </span>
+      </div>
+      <div class="body hasbar">
+        <div class="hd">
+          <div class="t">爱车保养</div>
+          <div class="s">已同步 19:03</div>
+        </div>
+
+        <div class="chipset">
+          <div class="chip on">沪A·DC 福特</div>
+          <div class="chip">沪M·9C 丰田</div>
+        </div>
+
+        <div class="card">
+          <div class="plate">沪A·DC</div>
+          <div class="name">福特 福克斯</div>
+          <div class="odo">124099<small>km</small></div>
+
+          <div class="barwrap">
+            <div class="barhead"><span>下次保养 · 空气滤芯</span><b>已超期 1 099 km</b></div>
+            <div class="track"><i class="dg" style="width:100%"></i><u style="width:31%"></u></div>
+            <div class="trackmarks"><span>上次保养 2025-07-31</span><span>周期 20 000 km</span></div>
+          </div>
+
+          <div class="due">
+            <div class="dd"></div>
+            <div class="dt">
+              <b>空气滤芯 该换了</b>
+              <span>时间超期 114 天 · 上次保养 2025-07-31</span>
+            </div>
+            <div class="dv">逾期</div>
+          </div>
+
+          <div class="matrix">
+            <div class="mxhead"><b>各部件余量</b><span>按周期推算 · 点击查看</span></div>
+          <button class="mxrow">
+            <div class="mx1"><span class="mxdot"></span><span class="mxname">机油</span><span class="mxval">10 000 km</span></div>
+            <div class="mxsub">上次 2026-11-03 · 还剩 162 天</div>
+            <div class="mxbar"><i class="" style="width:89%"></i></div>
+          </button>
+          <button class="mxrow">
+            <div class="mx1"><span class="mxdot"></span><span class="mxname">机油滤清器</span><span class="mxval">10 000 km</span></div>
+            <div class="mxsub">上次 2026-11-03 · 还剩 162 天</div>
+            <div class="mxbar"><i class="" style="width:89%"></i></div>
+          </button>
+          <button class="mxrow">
+            <div class="mx1"><span class="mxdot dg"></span><span class="mxname">空气滤芯</span><span class="mxval dg">超期 1 099 km</span></div>
+            <div class="mxsub">上次 2025-07-31 · 超期 114 天</div>
+            <div class="mxbar"><i class=" dg" style="width:100%"></i><u style="width:31%"></u></div>
+          </button>
+          <button class="mxrow">
+            <div class="mx1"><span class="mxdot"></span><span class="mxname">蓄电池</span><span class="mxval">712 天</span></div>
+            <div class="mxsub">上次 2026-11-03 · 到期 2028-11-03</div>
+            <div class="mxbar"><i class="" style="width:98%"></i></div>
+          </button>
+          </div>
+        </div>
+      </div>
+      <div class="fab">＋ 记一笔</div>
+      <div class="tabbar">
+        <div class="on"><svg viewBox="0 0 20 20"><path d="M3 15a8 8 0 1 1 14 0"/><path d="M10 15l3.5-5"/></svg>概览</div>
+        <div><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h8"/></svg>记录</div>
+        <div><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/><circle cx="8" cy="6" r="1.8"/><circle cx="13" cy="10" r="1.8"/><circle cx="7" cy="14" r="1.8"/></svg>设置</div>
+      </div>
+    </div>
+    <div class="note">首页是一块车辆大卡：车牌、超大里程数字、保养周期进度条（满格红为已超期），下面是各部件余量矩阵；记录与设置各自独立一页，底部三档导航切换。</div>
+  </div>
+
+  <!-- 02 保养记录 -->
+  <div class="cellwrap">
+    <div class="cap">02 · 保养记录 · 独立页</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>5G · 82%</span></div>
+      <div class="body hasbar">
+        <div class="hd">
+          <div class="t">保养记录</div>
+          <div class="s">沪A·DC · 福特福克斯 · 4 条</div>
+        </div>
+
+        <div class="chipset">
+          <div class="chip on">沪A·DC 福特</div>
+          <div class="chip">沪M·9C 丰田</div>
+        </div>
+
+        <div class="tl">
+          <div class="tli">
+            <div class="row1"><b>124099 km</b><span>2026-11-03</span><span class="amt">¥2950.53</span></div>
+            <div class="row2">机油 · 机油滤清器 · 蓄电池 <em>+</em> 2 <em>·</em> 万众汽车 4S 店 <span class="del">删除</span></div>
+          </div>
+          <div class="tli">
+            <div class="row1"><b>112707 km</b><span>2026-01-28</span><span class="amt">¥274.54</span></div>
+            <div class="row2">机油 · 机滤 <em>·</em> 京东养车 <span class="del">删除</span></div>
+          </div>
+          <div class="tli rep">
+            <div class="row1"><b>105000 km</b><span>2025-10-19</span><span class="amt">¥0</span></div>
+            <div class="row2">刹车片（前） <em>·</em> 京东养车 <em>·</em> 维修 <span class="del">删除</span></div>
+          </div>
+          <div class="tli">
+            <div class="row1"><b>103000 km</b><span>2025-07-31</span><span class="amt">¥1866.20</span></div>
+            <div class="row2">机油 · 机滤 · 空滤 <em>+</em> 3 <em>·</em> 京东养车 <span class="del">删除</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="tabbar">
+        <div><svg viewBox="0 0 20 20"><path d="M3 15a8 8 0 1 1 14 0"/><path d="M10 15l3.5-5"/></svg>概览</div>
+        <div class="on"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h8"/></svg>记录</div>
+        <div><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/><circle cx="8" cy="6" r="1.8"/><circle cx="13" cy="10" r="1.8"/><circle cx="7" cy="14" r="1.8"/></svg>设置</div>
+      </div>
+      <div class="fab">＋ 记一笔</div>
+    </div>
+    <div class="note">记录独立成页：顶部是这台车的身份与车辆切换，下面是时间线式的记录流；底部三档导航切换页面，「＋ 记一笔」浮在右下角。</div>
+  </div>
+
+  <!-- 03 详情 -->
+  <div class="cellwrap">
+    <div class="cap">03 · 保养详情（只读）· 可滚动</div>
+    <div class="phone tall">
+      <div class="status"><span>9:41</span><span>5G · 82%</span></div>
+      <div class="body">
+        <div class="hd">
+          <div class="back">←</div>
+          <div class="t">记录详情</div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="s dangerlink">删除</div>
+            <div class="s" style="color:var(--ac)">编辑</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="plate">保养 · 2026-11-03</div>
+          <div class="odo" style="font-size:46px;margin-top:16px">124099<small>km</small></div>
+          <div class="stats">
+            <div class="sbox">
+              <b>¥2950.53</b>
+              <span>总费用</span>
+            </div>
+            <div class="sbox">
+              <b>5</b>
+              <span>项目数</span>
+            </div>
+            <div class="sbox">
+              <b>19</b>
+              <span>距今(天)</span>
+            </div>
+          </div>
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line)">
+            <div style="font:700 9.5px/1 var(--fs);letter-spacing:.2em;color:var(--ac)">NEXT SERVICE</div>
+            <div style="font:800 15px/1.3 var(--fs);margin-top:9px">机油 · 还差 10 000 km</div>
+            <div style="font:600 11px/1.4 var(--fs);color:var(--txt3);margin-top:7px">到期 2027-05-03 · 还剩 162 天</div>
+          </div>
+        </div>
+
+        <div class="grp">车辆与位置</div>
+        <div class="field"><label>车辆识别码 VIN</label><div class="v" style="font-size:13px;letter-spacing:.06em">LFV2A21K1XW312846</div></div>
+        <div class="field"><label>保养地点</label><div class="v cn">万众汽车 4S 店</div></div>
+        <div class="field" style="border-bottom:0"><label>备注</label><div class="v cn" style="font-weight:500;color:var(--txt2)">师傅建议下次 6 万公里换变速箱油</div></div>
+
+        <div class="grp">零件明细 · 5 项</div>
+        <div class="items">
+          <div class="itemrow"><div class="n">驱动皮带<small>1 × ¥110</small></div><div class="s">¥110</div></div>
+          <div class="itemrow"><div class="n">发电机<small>1 × ¥1293.05</small></div><div class="s">¥1293.05</div></div>
+          <div class="itemrow"><div class="n">机油滤清器<small>1 × ¥44.99</small></div><div class="s">¥44.99</div></div>
+          <div class="itemrow"><div class="n">蓄电池<small>1 × ¥397.99</small></div><div class="s">¥397.99</div></div>
+          <div class="itemrow"><div class="n">机油<small>2 × ¥320.35</small></div><div class="s">¥640.70</div></div>
+        </div>
+
+        <div class="sum"><span>零配件 ¥2486.73 / 工时费 ¥463.80</span><b>¥2950.53</b></div>
+      </div>
+      <div class="dialog">
+        <div class="sheet2">
+          <div class="dt2">删除这条保养记录？</div>
+          <div class="ds2">记录 2026-11-03（124099 km）将被移除，零件历史里的「机油滤清器 / 蓄电池 / 驱动皮带 / 发电机」也会一并清掉。此操作不可撤销。</div>
+          <div class="drow">
+            <button class="btn ghost">取消</button>
+            <button class="btn danger">确认删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">详情是一块主卡 + 一列轻量列表：里程数字仍是主角，零件明细压成圆角容器里的紧凑行，合计用强调色块收尾。</div>
+  </div>
+
+  <!-- 03 表单 -->
+  <div class="cellwrap">
+    <div class="cap">04 · 记录表单（新增 / 编辑）· 可滚动</div>
+    <div class="phone tall">
+      <div class="status"><span>9:41</span><span>5G · 82%</span></div>
+      <div class="body hasbar">
+        <div class="hd">
+          <div class="back">←</div>
+          <div class="t">新增保养</div>
+          <div class="s">草稿</div>
+        </div>
+
+        <div class="card" style="padding:14px 16px;margin-bottom:20px;border-radius:14px">
+          <div style="font:700 9.5px/1 var(--fs);letter-spacing:.2em;color:var(--ac)">VEHICLE</div>
+          <div style="font:700 14px/1.2 var(--fs);margin-top:8px">福特 福克斯 · 沪A·DC</div>
+        </div>
+
+        <div class="grp" style="margin-top:0">本次性质</div>
+        <div class="seg">
+          <div class="on">保养</div><div>维修</div>
+        </div>
+        <div class="hint">保养记录参与周期推算；维修记录单独计入维修次数与费用。</div>
+
+        <div class="grp">基础信息</div>
+        <div class="field"><label>保养日期 *</label><div class="v">2026-11-03</div></div>
+        <div class="field"><label>公里数 (km) *</label><div class="v">124099</div></div>
+        <div class="field" style="border-bottom:0">
+          <label>保养地点 / 商家</label>
+          <div class="v cn">京东养车</div>
+          <div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+            <span class="chip">4S店</span><span class="chip">途虎养车</span><span class="chip">自己动手</span>
+          </div>
+        </div>
+
+        <div class="grp">保养项目 / 零配件 · 3 项</div>
+        <div class="items">
+          <div class="itemrow"><div class="n">机油<small>2 × ¥320.35</small></div><div class="s">¥640.70</div><div class="x">✕</div></div>
+          <div class="itemrow"><div class="n">机油滤清器<small>1 × ¥44.99</small></div><div class="s">¥44.99</div><div class="x">✕</div></div>
+          <div class="itemrow"><div class="n">蓄电池<small>1 × ¥397.99</small></div><div class="s">¥397.99</div><div class="x">✕</div></div>
+        </div>
+
+        <div class="card" style="padding:15px;margin-top:14px;border-radius:16px">
+          <div style="font:700 9.5px/1 var(--fs);letter-spacing:.2em;color:var(--txt3)">新增条目</div>
+          <div class="field" style="margin-top:12px"><label>项目名称 *</label><div class="v ph">如：机油、空气滤芯、刹车片</div></div>
+          <div class="seg" style="margin:12px 0 0">
+            <div class="on">单价 × 数量</div><div>直接录总价</div>
+          </div>
+          <div class="fieldrow" style="margin-top:12px">
+            <div class="field" style="flex:.34"><label>数量</label><div class="v">1</div></div>
+            <div class="field" style="flex:.66"><label>单价 (元)</label><div class="v ph">0.00</div></div>
+          </div>
+          <button class="btn ghost sm" style="margin-top:14px">＋ 加入清单</button>
+        </div>
+
+        <div class="grp">工时费与备注</div>
+        <div class="field"><label>工时费 (元) · 可填 0</label><div class="v">463.80</div></div>
+      </div>
+      <div class="bottom">
+        <div class="sum" style="margin-bottom:11px"><span>合计</span><b>¥2950.53</b></div>
+        <button class="btn">保存记录</button>
+      </div>
+    </div>
+    <div class="note">表单只有发丝下划线和一行小字标签，没有一个圆角输入框；「本次性质」做成两个胶囊，提示文字永远用最弱的灰色。</div>
+  </div>
+
+  <!-- 04 车辆编辑 -->
+  <div class="cellwrap">
+    <div class="cap">05 · 车辆编辑</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>5G · 82%</span></div>
+      <div class="body">
+        <div class="hd">
+          <div class="back">←</div>
+          <div class="t">编辑车辆</div>
+        </div>
+
+        <div class="card" style="text-align:center;padding:24px 16px;margin-bottom:22px">
+          <div style="font:800 30px/1 var(--fs);letter-spacing:.04em">沪A·DC</div>
+          <div style="font:700 10px/1 var(--fs);letter-spacing:.24em;color:var(--txt3);margin-top:12px">FORD · FOCUS</div>
+        </div>
+
+        <div class="grp" style="margin-top:0">车辆参数</div>
+        <div class="field"><label>品牌 *</label><div class="v cn">福特</div></div>
+        <div class="field"><label>车型 *</label><div class="v cn">福克斯</div></div>
+        <div class="field"><label>车牌号</label><div class="v">沪A·DC</div></div>
+        <div class="field" style="border-bottom:0"><label>购置日期</label><div class="v">2023-04-18</div></div>
+
+        <div class="grp">提示</div>
+        <div class="hint" style="margin-bottom:18px">删除此车辆后，相关的保养记录和零配件历史也会一并删除，该操作不可撤销。</div>
+
+        <button class="btn">保存修改</button>
+        <button class="btn danger" style="margin-top:10px">删除此车辆</button>
+      </div>
+    </div>
+    <div class="note">车牌成为这张页面的绝对主角，参数全部退成下划线输入；删除按钮只留一条红边，不再有图标。</div>
+  </div>
+
+  <!-- 05 车辆管理 -->
+  <div class="cellwrap">
+    <div class="cap">06 · 车辆管理 · 排序</div>
+    <div class="phone">
+      <div class="status"><span>9:41</span><span>5G · 82%</span></div>
+      <div class="body">
+        <div class="hd">
+          <div class="back">←</div>
+          <div class="t">车辆管理</div>
+          <div class="s">3 辆</div>
+        </div>
+        <div class="hint" style="margin-bottom:16px">长按车辆可拖动调整顺序，主页标签页同步此顺序。</div>
+
+        <div class="card" style="padding:0;margin-bottom:12px;border-radius:18px">
+          <div class="itemrow" style="padding:15px">
+            <div class="grip">⠿</div><div class="idx">01</div>
+            <div class="n">福特 福克斯<small>沪A·DC · 2023-04-18</small></div>
+          </div>
+          <div class="nextrow" style="padding:0 15px 14px;margin-top:-6px">
+            <div class="dot dg"></div><span>保养 3 次 · 维修 1 次</span>
+          </div><div class="carsil on">
+              <svg viewBox="0 0 120 44" aria-hidden="true">
+                <path class="body" d="M6 32c0-5 3-7 8-8l14-2 12-9c2-1.5 4-2 6-2h20c3 0 5 1 7 2.5l9 8c5 1 8 3 8 8v3H6z"/>
+                <path class="glass" d="M42 22l10-7c1-.7 2-1 3.5-1H64v8z"/>
+                <path class="glass" d="M67 14h13c2 0 3.5.7 5 2l6.5 6H67z"/>
+                <circle class="wheel" cx="28" cy="34" r="8"/>
+                <circle class="wheel" cx="92" cy="34" r="8"/>
+              </svg>
+            </div>
+
+          <div class="nextrow" style="padding:0 15px 16px;margin-top:-8px">
+            <div class="dot dg"></div><span><b>下次保养：空气滤芯</b> · 已超期 1 099 km</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;margin-bottom:12px;border-radius:18px">
+          <div class="itemrow" style="padding:15px">
+            <div class="grip">⠿</div><div class="idx">02</div>
+            <div class="n">丰田 卡罗拉<small>沪M·9C · 2021-09-02</small></div>
+          </div>
+          <div class="nextrow" style="padding:0 15px 14px;margin-top:-6px">
+            <div class="dot"></div><span>保养 4 次 · 维修 1 次</span>
+          </div><div class="carsil">
+              <svg viewBox="0 0 120 44" aria-hidden="true">
+                <path class="body" d="M6 32c0-5 3-7 8-8l14-2 12-9c2-1.5 4-2 6-2h20c3 0 5 1 7 2.5l9 8c5 1 8 3 8 8v3H6z"/>
+                <path class="glass" d="M42 22l10-7c1-.7 2-1 3.5-1H64v8z"/>
+                <path class="glass" d="M67 14h13c2 0 3.5.7 5 2l6.5 6H67z"/>
+                <circle class="wheel" cx="28" cy="34" r="8"/>
+                <circle class="wheel" cx="92" cy="34" r="8"/>
+              </svg>
+            </div>
+
+          <div class="nextrow" style="padding:0 15px 16px;margin-top:-8px">
+            <div class="dot"></div><span><b>下次保养：机油</b> · 还差 10 000 km</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;border-radius:18px">
+          <div class="itemrow" style="padding:15px">
+            <div class="grip">⠿</div><div class="idx">03</div>
+            <div class="n">大众 帕萨特<small>未登记车牌 · 2019-06-11</small></div>
+          </div>
+          <div class="nextrow" style="padding:0 15px 14px;margin-top:-6px">
+            <div class="dot"></div><span>保养 0 次 · 维修 2 次</span>
+          </div><div class="carsil">
+              <svg viewBox="0 0 120 44" aria-hidden="true">
+                <path class="body" d="M6 32c0-5 3-7 8-8l14-2 12-9c2-1.5 4-2 6-2h20c3 0 5 1 7 2.5l9 8c5 1 8 3 8 8v3H6z"/>
+                <path class="glass" d="M42 22l10-7c1-.7 2-1 3.5-1H64v8z"/>
+                <path class="glass" d="M67 14h13c2 0 3.5.7 5 2l6.5 6H67z"/>
+                <circle class="wheel" cx="28" cy="34" r="8"/>
+                <circle class="wheel" cx="92" cy="34" r="8"/>
+              </svg>
+            </div>
+
+          <div class="nextrow" style="padding:0 15px 16px;margin-top:-8px">
+            <div class="dot"></div><span>暂无保养记录</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">车辆管理是二级页：每辆车一张卡，卡内两行状态 —— 保养/维修次数（蓝点）与下一次保养（红点代表逾期）。</div>
+  </div>
+
+  <!-- 06 设置 -->
+  <div class="cellwrap">
+    <div class="cap">07 · 设置 · 列表与开关 · 可滚动</div>
+    <div class="phone tall">
+      <div class="status"><span>9:41</span><span>5G · 82%</span></div>
+      <div class="body hasbar">
+        <div class="hd">
+          <div class="t">设置</div>
+        </div>
+
+        <div class="grp" style="margin-top:4px">车辆</div>
+        <div class="listrow">
+          <div class="rt"><b>车辆管理</b><span>添加、编辑和删除车辆信息</span></div>
+          <div style="color:var(--txt3)">›</div>
+        </div>
+
+        <div class="grp">数据同步</div>
+        <div class="card" style="padding:16px">
+          <div class="hint" style="margin:0 0 4px">通过 WebDAV 将数据同步到云端，多设备共享。</div>
+          <div class="listrow" style="border-bottom:0;padding:12px 0">
+            <div class="rt"><b>启用 WebDAV 同步</b><span>云端数据优先</span></div>
+            <div class="toggle"><i></i></div>
+          </div>
+          <div class="field" style="margin-top:8px"><label>WebDAV 地址</label><div class="v" style="font-size:12.5px">https://dav.jianguoyun.com/dav</div></div>
+          <div class="fieldrow">
+            <div class="field" style="flex:1"><label>用户名</label><div class="v ph">可选</div></div>
+            <div class="field" style="flex:1"><label>密码</label><div class="v ph">可选</div></div>
+          </div>
+          <div class="listrow" style="border-bottom:0;padding:14px 0 6px">
+            <div class="rt"><span>每 <b>1</b> 分钟同步一次</span></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn ghost sm" style="padding:8px 14px;width:auto">−</button>
+              <button class="btn ghost sm" style="padding:8px 14px;width:auto">＋</button>
+            </div>
+          </div>
+          <button class="btn sm" style="margin-top:14px">立即同步</button>
+        </div>
+
+        <div class="grp">保养周期</div>
+        <div class="card" style="padding:16px">
+          <div class="hint" style="margin:0 0 10px">按项目设定周期，首页据此提示下一次保养。</div>
+          <div class="items" style="border:0;border-radius:0;background:transparent">
+            <div class="itemrow" style="padding:10px 0"><div class="n">机油</div><div class="s" style="color:var(--txt2)">10 000 km · 6 个月</div></div>
+            <div class="itemrow" style="padding:10px 0"><div class="n">机油滤清器</div><div class="s" style="color:var(--txt2)">10 000 km · 6 个月</div></div>
+            <div class="itemrow" style="padding:10px 0"><div class="n">空气滤芯</div><div class="s" style="color:var(--txt2)">20 000 km · 12 个月</div></div>
+            <div class="itemrow" style="padding:10px 0;border-bottom:0"><div class="n">蓄电池</div><div class="s" style="color:var(--txt2)">— · 24 个月</div></div>
+          </div>
+          <button class="btn ghost sm" style="margin-top:12px">编辑周期表</button>
+        </div>
+
+        <div class="grp">数据</div>
+        <div class="btnrow">
+          <button class="btn ghost">导出为 CSV</button>
+          <button class="btn ghost">导入数据</button>
+        </div>
+        <div style="font:400 11px/1.7 var(--fs);color:var(--txt3);margin-top:10px">导出结果由您选择保存位置，不写入公共目录。</div>
+      </div>
+      <div class="tabbar">
+        <div><svg viewBox="0 0 20 20"><path d="M3 15a8 8 0 1 1 14 0"/><path d="M10 15l3.5-5"/></svg>概览</div>
+        <div><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h8"/></svg>记录</div>
+        <div class="on"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/><circle cx="8" cy="6" r="1.8"/><circle cx="13" cy="10" r="1.8"/><circle cx="7" cy="14" r="1.8"/></svg>设置</div>
+      </div>
+    </div>
+    <div class="note">设置页回到「列表 + 开关」的最简形式：每行一个动作，右侧只有开关或箭头，没有卡片阴影；底部三档导航停在「设置」。</div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('click',function(e){
+  var p=e.target.closest('.phone'); if(!p) return;
+  var ov=document.createElement('div'); ov.className='lightbox';
+  ov.appendChild(p.cloneNode(true));
+  ov.addEventListener('click',function(){ov.remove();});
+  document.body.appendChild(ov);
+});
+</script>
+</body>
+</html>

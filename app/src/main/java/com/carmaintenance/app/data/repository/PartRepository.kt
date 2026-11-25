@@ -9,8 +9,12 @@ class PartRepository(
     private val partHistoryDao: PartHistoryDao
 ) {
     
-    suspend fun getPartsByRecord(recordId: Long): List<PartItem> = 
+    suspend fun getPartsByRecord(recordId: Long): List<PartItem> =
         partItemDao.getPartsByRecordSuspend(recordId)
+
+    /** 监听某条记录的零配件，编辑保存后自动刷新详情页 */
+    fun getPartsByRecordFlow(recordId: Long): kotlinx.coroutines.flow.Flow<List<PartItem>> =
+        partItemDao.getPartsByRecord(recordId)
     
     /** 监听全部零配件变化 */
     fun getAllPartsFlow(): kotlinx.coroutines.flow.Flow<List<PartItem>> =

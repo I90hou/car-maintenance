@@ -9,6 +9,9 @@
     <color name="accent">#F97316</color>
     <color name="accent_light">#FB923C</color>
     
+    <!-- 现代车座舱（B 版）底色 -->
+    <color name="cockpit_background">#0A0C0F</color>
+
     <!-- 中性色 -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>

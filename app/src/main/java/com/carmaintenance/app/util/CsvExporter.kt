@@ -3,6 +3,7 @@ package com.carmaintenance.app.util
 import android.content.Context
 import android.net.Uri
 import com.carmaintenance.app.data.AppDatabase
+import com.carmaintenance.app.data.entity.RecordType
 import com.carmaintenance.app.data.entity.Vehicle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,7 +43,7 @@ object CsvExporter {
             
             // ===== 保养记录 =====
             writer.write("=== 保养记录 ===\n")
-            writer.write("车牌号,车辆,保养日期,公里数,地点,零配件费,工时费,总费用,备注,保养项目\n")
+            writer.write("车牌号,车辆,记录性质,记录日期,公里数,地点,零配件费,工时费,总费用,备注,保养项目\n")
             
             vehicles.forEach { vehicle ->
                 val records = db.maintenanceRecordDao().getRecordsByVehicleSuspend(vehicle.id)
@@ -59,6 +60,8 @@ object CsvExporter {
                     writer.write(escapeCsv(vehicle.plateNumber.ifBlank { "-" }))
                     writer.write(",")
                     writer.write(escapeCsv(vehicle.displayName))
+                    writer.write(",")
+                    writer.write(escapeCsv(RecordType.label(record.type)))
                     writer.write(",")
                     writer.write(escapeCsv(DateTimeFormatter.formatDate(record.date)))
                     writer.write(",")

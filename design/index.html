@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>爱车保养 · 前端重构 · B 版「现代车座舱」</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope/800.css">
+<style>
+:root{
+  --bg:#0A0C0F; --s1:#12151A; --s2:#181C22; --s3:#20252C;
+  --line:#242A32; --line2:#2F363F;
+  --txt:#EAEEF2; --txt2:#8A919B; --txt3:#5A616B;
+  --ac:#4C8DFF; --acdim:rgba(76,141,255,.15); --ok:#3DD68C; --warn:#F5A524; --dg:#FF6B6B;
+  --fs:"Manrope","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--fs);-webkit-font-smoothing:antialiased;line-height:1.75}
+.wrap{max-width:1000px;margin:0 auto;padding:48px 26px 100px}
+.tag{font:700 10px/1 var(--fs);letter-spacing:.26em;text-transform:uppercase;color:var(--ac)}
+h1{margin:12px 0 0;font:800 30px/1.25 var(--fs);letter-spacing:-.01em}
+.sub{margin:14px 0 0;color:var(--txt2);font-size:14px;max-width:800px}
+h2{margin:56px 0 0;font:800 21px/1.3 var(--fs);letter-spacing:-.01em;padding-bottom:12px;border-bottom:1px solid var(--line)}
+h2 .n{color:var(--ac);font-weight:800;margin-right:10px}
+p{margin:14px 0 0;color:var(--txt2);font-size:14px}
+p b{color:var(--txt);font-weight:700}
+.axis{display:flex;flex-wrap:wrap;margin-top:24px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--s1)}
+.axis div{flex:1 1 160px;padding:13px 15px;border-right:1px solid var(--line)}
+.axis div:last-child{border-right:0}
+.axis b{display:block;font:700 9px/1 var(--fs);letter-spacing:.2em;color:var(--txt3);margin-bottom:7px}
+.axis span{font-size:13px;color:var(--txt)}
+.swatch{display:flex;gap:9px;margin-top:20px;flex-wrap:wrap}
+.swatch i{width:52px;height:52px;border:1px solid var(--line2);display:block;border-radius:10px;position:relative}
+.swatch i b{position:absolute;left:0;right:0;bottom:5px;font:700 7.5px/1 var(--fs);color:var(--txt3);text-align:center;font-style:normal}
+.swatch i span{position:absolute;left:0;right:0;top:6px;font:700 7.5px/1 var(--fs);color:rgba(255,255,255,.5);text-align:center}
+table{width:100%;border-collapse:collapse;margin-top:22px;background:var(--s1);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+th{background:var(--s2);text-align:left;padding:11px 14px;font:700 9.5px/1.6 var(--fs);letter-spacing:.18em;text-transform:uppercase;color:var(--txt3);border-bottom:1px solid var(--line)}
+td{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--txt2);vertical-align:top}
+td.fn{color:var(--txt);font-weight:700;width:250px}
+tr:last-child td{border-bottom:0}
+tr.grp td{background:var(--s2);font:700 9.5px/1.6 var(--fs);letter-spacing:.2em;text-transform:uppercase;color:var(--ac);padding:10px 14px}
+.screens{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-top:22px}
+.scr{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:16px}
+.scr b{display:block;font:700 9.5px/1 var(--fs);letter-spacing:.2em;color:var(--ac)}
+.scr h4{margin:10px 0 0;font:800 15px/1.35 var(--fs);color:var(--txt)}
+.scr p{margin:9px 0 0;font-size:12.5px;line-height:1.7}
+.cta{display:inline-block;margin-top:26px;background:var(--ac);color:#06101F;text-decoration:none;padding:13px 20px;border-radius:999px;font:800 12.5px/1 var(--fs);letter-spacing:.05em}
+.cta:hover{background:#6BA0FF}
+.box{margin-top:20px;background:var(--s1);border:1px solid var(--line);border-left:3px solid var(--ac);border-radius:0 14px 14px 0;padding:16px 18px;font-size:13.5px;color:var(--txt2)}
+.box b{color:var(--txt)}
+.box.warn{border-left-color:var(--warn)}
+.box.dg{border-left-color:var(--dg)}
+.rej{margin-top:18px;background:var(--s1);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.rej div{padding:16px 18px;border-bottom:1px solid var(--line)}
+.rej div:last-child{border-bottom:0}
+.rej b{display:block;font:800 14.5px/1.5 var(--fs);color:var(--txt);margin-bottom:7px}
+.rej code{font:700 12px/1 var(--fs);color:var(--ac)}
+.rej span{font-size:13px;color:var(--txt2)}
+pre{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:16px 18px;overflow-x:auto;font:400 12px/1.85 ui-monospace,Consolas,monospace;color:var(--txt2);margin-top:18px}
+pre b{color:var(--ac);font-weight:700}
+ul{margin:12px 0 0;padding-left:20px;color:var(--txt2);font-size:13.5px}
+li{margin:7px 0}
+li b{color:var(--txt)}
+.foot{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);font-size:12.5px;color:var(--txt3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="tag">Direction B · 风格：现代汽车（智能座舱）</div>
+  <h1>现代车座舱 · 像电动车中控屏那样安静</h1>
+  <p class="sub">本页是前端重构的<b style="color:var(--txt)">最终定稿规格</b>：只保留被选中的这一版，把设计语言、逐条功能落点、决策依据与 Compose 落地方式写清楚，供日后回看。<br>静态原型见 <a href="prototype.html" style="color:var(--ac)">prototype.html</a>（7 屏，点击手机画面可放大）。</p>
+
+  <div class="axis">
+    <div><b>明暗</b><span>全暗 #0A0C0F</span></div>
+    <div><b>彩色</b><span>近乎无彩 + 电光蓝单一强调色</span></div>
+    <div><b>字体</b><span>Manrope（几何无衬线）+ 系统中黑</span></div>
+    <div><b>形状</b><span>大圆角 · 发丝线 · 胶囊 · 无阴影</span></div>
+    <div><b>骨架</b><span>车辆大卡 + 时间线 + 底部导航</span></div>
+    <div><b>签名</b><span>部件余量矩阵 + 玻璃标签栏</span></div>
+    <div><b>功能化</b><span>每行一个部件的剩余里程/天数，由周期推算</span></div>
+  </div>
+
+  <div class="swatch">
+    <i style="background:#0A0C0F"><span>#0A0C0F</span><b>底</b></i>
+    <i style="background:#12151A"><span>#12151A</span><b>一级</b></i>
+    <i style="background:#181C22"><span>#181C22</span><b>二级</b></i>
+    <i style="background:#20252C"><span>#20252C</span><b>三级</b></i>
+    <i style="background:#4C8DFF"><span>#4C8DFF</span><b>强调</b></i>
+    <i style="background:#3DD68C"><span>#3DD68C</span><b>正常</b></i>
+    <i style="background:#F5A524"><span>#F5A524</span><b>临近</b></i>
+    <i style="background:#FF6B6B"><span>#FF6B6B</span><b>超期</b></i>
+  </div>
+
+  <a class="cta" href="prototype.html">打开静态原型 →</a>
+
+  <h2><span class="n">01</span>七屏结构</h2>
+  <p class="sub">信息架构分两级：<b>一级页</b>（概览 / 记录 / 设置）带底部三档导航；<b>二级页</b>（详情 / 表单 / 车辆编辑 / 车辆管理）带返回箭头、不带导航栏。</p>
+  <div class="screens">
+    <div class="scr"><b>01</b><h4>概览</h4><p>车辆大卡：车牌、车型、超大里程读数；最紧急一项的周期进度条；下面是各部件余量矩阵。记录与设置各自独立一页。</p></div>
+    <div class="scr"><b>02</b><h4>保养记录</h4><p>独立页，跟随当前选中的车。时间线式记录流，节点区分保养（蓝）与维修（红）。</p></div>
+    <div class="scr"><b>03</b><h4>记录详情</h4><p>只读。一块主卡放里程、费用、项目数与 NEXT SERVICE，下方是零件明细与合计。右上角可编辑 / 删除。</p></div>
+    <div class="scr"><b>04</b><h4>记录表单</h4><p>新增 / 编辑。只有发丝下划线输入，没有圆角输入框；底部固定合计条与保存按钮。</p></div>
+    <div class="scr"><b>05</b><h4>车辆编辑</h4><p>车牌是主角，参数退成下划线输入。删除按钮只留红边。</p></div>
+    <div class="scr"><b>06</b><h4>车辆管理</h4><p>每辆车一张卡，卡内两行状态：保养/维修次数、下一次保养。长按可拖动排序。</p></div>
+    <div class="scr"><b>07</b><h4>设置</h4><p>回到「列表 + 开关」的最简形式：每行一个动作，右侧只有开关或箭头。</p></div>
+  </div>
+
+  <h2><span class="n">02</span>功能覆盖对照表</h2>
+  <p class="sub">逐条列出现有 App 的功能与入口，并标出它在定稿版中的落点。<b>无删减</b>，只在呈现方式上改变。</p>
+  <table>
+    <thead><tr><th>功能点</th><th>定稿落点</th></tr></thead>
+    <tbody>
+      <tr class="grp"><td colspan="2">概览页</td></tr>
+      <tr><td class="fn">车辆切换（多车）</td><td>顶部胶囊 chip，选中填电光蓝</td></tr>
+      <tr><td class="fn">底部导航（概览 / 记录 / 设置）</td><td>玻璃质感标签栏，选中项图标与文字转电光蓝</td></tr>
+      <tr><td class="fn">记录列表（独立页）</td><td>时间线（带竖线与节点）</td></tr>
+      <tr><td class="fn">记录页跟随当前车辆</td><td>顶部车辆 chip 切换，与概览页共用选中态</td></tr>
+      <tr><td class="fn">二级页不带底部导航</td><td>详情 / 表单 / 车辆编辑 / 车辆管理均带返回箭头</td></tr>
+      <tr><td class="fn">里程 / 日期 / 地点 / 金额</td><td>超大里程数字 + 行内小字</td></tr>
+      <tr><td class="fn">保养项目与备注</td><td>行内文字</td></tr>
+      <tr><td class="fn">新增记录入口</td><td>右下角电光蓝悬浮钮「记一笔」</td></tr>
+      <tr><td class="fn">空状态（无车 / 无记录）</td><td>居中说明文字</td></tr>
+      <tr><td class="fn">同步状态显示</td><td>概览页右上角「已同步 19:03」</td></tr>
+      <tr><td class="fn">删除记录 + 二次确认</td><td>记录行内「删除」→ 圆角确认框；详情页右上角「删除」同理</td></tr>
+      <tr><td class="fn">点击记录进入详情</td><td>整条时间线记录可点</td></tr>
+      <tr><td class="fn">每辆车保养状态摘要</td><td>车辆管理每行两行状态</td></tr>
+
+      <tr class="grp"><td colspan="2">记录详情</td></tr>
+      <tr><td class="fn">只读预览 + 编辑入口</td><td>主卡 + 右上角「编辑」</td></tr>
+      <tr><td class="fn">零件明细清单</td><td>圆角容器里的紧凑行</td></tr>
+      <tr><td class="fn">费用明细（配件 / 工时 / 总计）</td><td>强调色块收尾</td></tr>
+      <tr><td class="fn">详情页周期推算</td><td>主卡内 NEXT SERVICE 区块</td></tr>
+
+      <tr class="grp"><td colspan="2">记录表单</td></tr>
+      <tr><td class="fn">本次性质（保养 / 维修）</td><td>顶部两个胶囊；保养参与周期推算，维修单独计数</td></tr>
+      <tr><td class="fn">记录日期（日期选择）</td><td>发丝下划线字段 + 系统日期选择器</td></tr>
+      <tr><td class="fn">公里数（必填 + 校验）</td><td>大数字输入 + 红色提示行</td></tr>
+      <tr><td class="fn">保养地点（历史建议 / 清空）</td><td>可点选 chip + 「清空」</td></tr>
+      <tr><td class="fn">项目清单增删改</td><td>列表行；点行展开可改数量与单价，行尾 ✕ 删除</td></tr>
+      <tr><td class="fn">单价×数量 / 直接录总价</td><td>胶囊二选一（新增与编辑处各一组）</td></tr>
+      <tr><td class="fn">数量 / 单价录入</td><td>数量步进器 + 行内金额输入</td></tr>
+      <tr><td class="fn">工时费 · 备注</td><td>下划线字段 / 多行下划线输入</td></tr>
+      <tr><td class="fn">费用实时合计</td><td>底部合计条（强调色块）</td></tr>
+      <tr><td class="fn">保存（保存记录 / 保存修改）</td><td>电光蓝实心胶囊按钮</td></tr>
+      <tr><td class="fn">未保存离开确认</td><td>弹窗（保存并离开 / 不保存）</td></tr>
+
+      <tr class="grp"><td colspan="2">车辆</td></tr>
+      <tr><td class="fn">车辆编辑（品牌 / 车型 / 车牌 / 购置日期）</td><td>大号车牌 + 下划线输入</td></tr>
+      <tr><td class="fn">品牌 / 车型必填校验</td><td>红色提示行</td></tr>
+      <tr><td class="fn">保存 / 删除车辆</td><td>实心按钮 + 红色描边按钮</td></tr>
+      <tr><td class="fn">删除连带删除记录的警告</td><td>「提示」分组段落</td></tr>
+      <tr><td class="fn">车辆管理列表 / 添加 / 编辑 / 删除</td><td>圆角卡列表 + 右下角 ＋ 悬浮钮</td></tr>
+      <tr><td class="fn">拖动排序（同步概览页顺序）</td><td>⠿ 把手 + 可见序号</td></tr>
+      <tr><td class="fn">车辆识别（多车场景）</td><td>卡片右上角车身剪影，选中的车用强调色描边</td></tr>
+
+      <tr class="grp"><td colspan="2">保养周期 / 维修区分</td></tr>
+      <tr><td class="fn">记录性质（保养 / 维修）</td><td>时间线节点蓝 / 红；详情页主卡标签</td></tr>
+      <tr><td class="fn">周期规则表（项目 → 里程 / 时间）</td><td>设置 → 保养周期 → 编辑周期表</td></tr>
+      <tr><td class="fn">下次保养提示（概览页）</td><td>车辆大卡内的进度条（红段为逾期）</td></tr>
+      <tr><td class="fn">超期状态区分</td><td>满格红条 + 末端红尾（超出比例）</td></tr>
+      <tr><td class="fn">各部件余量</td><td>概览页余量矩阵，每行一个部件，点击展开到期点</td></tr>
+      <tr><td class="fn">保养 / 维修次数分列</td><td>车辆管理每行一行</td></tr>
+
+      <tr class="grp"><td colspan="2">设置</td></tr>
+      <tr><td class="fn">车辆管理入口</td><td>「车辆」分组下的列表行 + 箭头</td></tr>
+      <tr><td class="fn">WebDAV 启用开关</td><td>胶囊开关</td></tr>
+      <tr><td class="fn">地址 / 子目录 / 用户名 / 密码</td><td>下划线输入（配置默认收起）</td></tr>
+      <tr><td class="fn">自动同步开关 + 间隔分钟</td><td>胶囊开关 + ± 步进</td></tr>
+      <tr><td class="fn">立即同步</td><td>实心按钮</td></tr>
+      <tr><td class="fn">导出 CSV</td><td>「数据」分组下的次级按钮</td></tr>
+      <tr><td class="fn">同步 / 导出结果反馈</td><td>弱化状态行</td></tr>
+    </tbody>
+  </table>
+  <div class="box"><b>关于「导入数据」：</b>现有 App 的数据入口是 WebDAV 同步（云端优先，导入 + 上传一次完成），没有独立的 CSV 导入功能。本版沿用现状，<b>只保留「导出为 CSV」</b>，不凭空增加一个从未实现过的入口。</div>
+
+  <h2><span class="n">03</span>汽车元素：怎么变成功能而不只是装饰</h2>
+  <p class="sub">早期版本加过 RPM 1 200、水温 82 ℃、胎温 68 ℃、换挡灯、驾驶模式、PRND 等元素。它们看起来像车，但对一个保养 App 毫无意义，属于贴图式装饰，已全部撤掉。判据只有一条：<b>删掉它，功能会少什么</b>。过不了这关的一律不留。</p>
+  <table>
+    <thead><tr><th>功能</th><th>定稿落点</th></tr></thead>
+    <tbody>
+      <tr class="grp"><td colspan="2">核心：部件余量（把周期计算变成读数）</td></tr>
+      <tr><td class="fn">每个部件的剩余里程 / 天数</td><td>概览页余量矩阵，每行一个部件</td></tr>
+      <tr><td class="fn">超期如何表达</td><td>满格红条 + 末端红尾（超出比例）</td></tr>
+      <tr><td class="fn">「还剩多少」怎么读</td><td>看条形长度 + 右侧数字</td></tr>
+      <tr><td class="fn">逐项可点</td><td>整行可点，展开显示下次里程/时间到期点</td></tr>
+      <tr><td class="fn">最紧急一项</td><td>车辆大卡顶部的进度条与提醒行</td></tr>
+      <tr class="grp"><td colspan="2">构件类（同时是分隔与定位）</td></tr>
+      <tr><td class="fn">记录区分隔</td><td>发丝分隔线</td></tr>
+      <tr><td class="fn">一级导航</td><td>玻璃质感标签栏</td></tr>
+      <tr><td class="fn">车辆识别</td><td>车身剪影 + 车型文字</td></tr>
+      <tr><td class="fn">车辆切换</td><td>胶囊 chip</td></tr>
+    </tbody>
+  </table>
+  <div class="box"><b>余量口径：</b>条形长度一律表示「剩余比例」——机油 / 机滤 89%、蓄电池 98%；超期的空气滤芯满格标红，末端深红段表示超出比例 31%（时间口径，即先到期的那条约束）。<br><b>推算公式：</b>剩余比例 = min(里程剩余比, 时间剩余比)；时间按 365 / 12 天折算月。到期点取「最近一次包含该项目的保养记录」＋ 周期规则，维修记录不参与。</div>
+
+  <h2><span class="n">04</span>沿用的产品模型：保养 / 维修 区分与保养周期</h2>
+  <p class="sub">「保养」是周期性的，「维修」是偶发的。混在一条序列里，「距上次保养多少公里」根本无法回答——中间的维修点把间隔切断了。分开之后，保养是一条干净的序列，周期才算得出来。</p>
+  <ul>
+    <li><b>① 记录级分类</b>：每条记录带一个性质：保养或维修。维修记录同样记日期、里程、费用与项目，但不参与保养周期计算，只单独计入维修次数与维修费用。</li>
+    <li><b>② 周期规则挂在项目上</b>：机油 10 000 km / 6 个月、机油滤清器 10 000 km / 6 个月、空气滤芯 20 000 km / 12 个月、蓄电池 24 个月……内置常见项目的默认值，可在「设置 → 保养周期」逐条覆盖、增删。</li>
+    <li><b>③ 计算与提示</b>：某车某项目的最近一次保养里程与日期，加上周期规则，得到里程到期点与时间到期点，谁先到谁说了算。概览页只提示最紧急的一项，车辆管理页给每辆车一行摘要。</li>
+    <li><b>④ 名称归一化</b>：用户可能写「机滤」「空滤」「电瓶」。周期规则按规范名（机油滤清器 / 空气滤芯 / 蓄电池）匹配，否则规则挂不上记录，周期永远算不出来。</li>
+  </ul>
+  <div class="box"><b>样例数据已核对到自洽：</b>福特福克斯 4 条记录 —— 2026-11-03 保养 ¥2 950.53（124 099 km）、2026-01-28 保养 ¥274.54（112 707 km）、2025-10-19 维修 ¥0（105 000 km，刹车片）、2025-07-31 保养 ¥1 866.20（103 000 km）。合计 ¥5 091.27，保养 3 次 / 维修 1 次，距上次保养 19 天（基准日 2026-11-22）。空气滤芯以 2025-07-31 那次为基准，周期 20 000 km / 12 个月，已超期 1 099 km / 114 天 → 超出比例 31%；机油以 2026-11-03 那次为基准，还差 10 000 km，到期 2027-05-03（还剩 162 天）→ 余量 89%；蓄电池到期 2028-11-03（还剩 712 天）→ 余量 98%。</div>
+
+  <h2><span class="n">05</span>决策记录</h2>
+  <p class="sub">保留判断依据，免得日后回看时忘了为什么推翻。</p>
+  <div class="rej">
+    <div><b>最终选中的：B 版「现代车座舱」</b><span>当代电动车的数字座舱：几乎不用装饰，靠留白、发丝分隔线和一条电光蓝建立层级，数字是大屏主角、文字退到辅助位置；保养周期变成一条进度条，界面底部是玻璃质感的标签栏。它与这个 App 的使用场景吻合——日常反复打开、随手记一笔的工具，需要的是安静、清晰、不打扰。</span></div>
+    <div><b>A 版「零件档案」（<code>design/a-label.html</code>，已删除）</b><span>纸白底 + 墨黑 + 印章红 + 复写蓝，零件标签墙 + 带游标的余量刻度尺。材质语言与「一本自己攒的账」的心智确实贴合，签名元素（刻度尺游标）也最贴近「量」的到期表达。落选原因是本轮评审明确要求：三个方案不能只是换皮，而需在<b>明暗、彩色策略、字体、形状、骨架</b>五轴上全部拉开。A 版是浅色纸面，与 B 版的全暗数字座舱正好处在两个极端，放在一起并不构成「三个各自成立的场所」，且浅色在户外与车边强光下反而不如暗色耐看。</span></div>
+    <div><b>C 版「车间看板」（<code>design/c-board.html</code>，已删除）</b><span>深墨绿孔板 + 信号三色 + 三色工位旗，把「遥测」从赛道 pit wall 搬回真实修车厂——车间里管工位用的正是旗子与工位牌，这一版的产品叙述是成立的。落选原因与 A 版同源：深墨绿 + 单一信号黄的组合，在视觉上与「近黑底 + 单一亮橙 + 发丝线」这一生成式界面默认长相过于接近；且工位旗的状态编码在单手操作、纵向滚动的手机场景里，读取成本高于一条进度条。</span></div>
+    <div><b>前两轮的三版（收据纸 / 车机 HUD / 工程蓝图）</b><span>气质不对：收据纸是文具，HUD 偏科幻终端，蓝图属于工程制图——都不在「汽车」这条线上。</span></div>
+    <div><b>更早的一轮：A「经典车座舱」与 C「赛道遥测」</b><span>奶油底 + 黄铜 + 衬线，与近黑底 + 单一亮橙，恰好是生成式界面最常见的两种长相——前者像复古咖啡馆，后者像游戏 HUD。把它们当成汽车美学的结论是错的。真正跟车绑定、且天天跟人打交道的，是工单、零件标签、周期表这些纸面东西，和车间里挂着的旗子与工位牌。</span></div>
+    <div><b>共同的教训</b><span>多方案不是「同一副骨架刷三遍漆」。要拉开差异，必须同时换掉明暗、彩色策略、字体、形状语言与信息骨架，否则并排放在一起盲测能一眼分出是三个团队做的这一关就过不去。反过来，每个新增元素还要单独过一道功能判据，装饰性元素一律撤掉。</span></div>
+  </div>
+  <div class="box warn"><b>被删掉的原型文件已放入回收站</b>（<code>a-label.html</code> / <code>c-board.html</code>），需要回看时可以恢复；保留它们只是为了留档，不是为了留作备胎。</div>
+
+  <h2><span class="n">06</span>Compose 落地实现</h2>
+  <p class="sub">只改表现层与新增字段，数据层的既有结构（DAO / Repository / ViewModel 分层）不动。</p>
+  <table>
+    <thead><tr><th>文件</th><th>职责</th></tr></thead>
+    <tbody>
+      <tr><td class="fn">ui/theme/Theme.kt</td><td>Cockpit 色板（14 个 token）、Manrope 可变字体、字体层级、圆角规范；主题改为单一暗色</td></tr>
+      <tr><td class="fn">ui/components/Cockpit.kt</td><td>底部三档导航、顶栏、卡片、胶囊、分段控件、开关、余量进度条、确认框、车身剪影</td></tr>
+      <tr><td class="fn">ui/components/UnderlineField.kt</td><td>发丝下划线输入行、多行输入、二选一分段控件</td></tr>
+      <tr><td class="fn">ui/screen/OverviewScreen.kt</td><td>概览页：车辆大卡 + 余量矩阵</td></tr>
+      <tr><td class="fn">ui/screen/RecordsScreen.kt</td><td>记录页：时间线</td></tr>
+      <tr><td class="fn">ui/screen/RecordDetailScreen.kt</td><td>记录详情（只读）</td></tr>
+      <tr><td class="fn">ui/screen/RecordEditScreen.kt</td><td>记录表单（新增 / 编辑）</td></tr>
+      <tr><td class="fn">ui/screen/VehicleEditScreen.kt</td><td>车辆添加 / 编辑</td></tr>
+      <tr><td class="fn">ui/screen/VehicleManagerScreen.kt</td><td>车辆管理（拖动排序）</td></tr>
+      <tr><td class="fn">ui/screen/SettingsScreen.kt</td><td>设置 + 周期表编辑</td></tr>
+      <tr><td class="fn">ui/AppNavigation.kt</td><td>一级页 / 二级页路由与底部导航</td></tr>
+      <tr><td class="fn">data/entity/ServiceCycleRule.kt</td><td>周期规则实体（新增表）</td></tr>
+      <tr><td class="fn">util/ServiceCycleCalculator.kt</td><td>周期推算（纯逻辑）</td></tr>
+      <tr><td class="fn">util/PartNames.kt</td><td>项目名归一化</td></tr>
+      <tr><td class="fn">ui/viewmodel/ServiceCycleViewModel.kt</td><td>跨车辆周期状态汇总</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin:34px 0 0;font:800 16px/1.4 var(--fs);color:var(--txt)">数据模型变更</h3>
+  <pre><b>MaintenanceRecord</b>
+  + val type: String = RecordType.SERVICE   // SERVICE 保养 / REPAIR 维修
+  + indices: Index("type")
+
+<b>ServiceCycleRule</b>  <i>// 新增表</i>
+  partName        String   // 保养项目名称（唯一）
+  mileageInterval Int     // 里程周期 km，0 = 不按里程约束
+  monthInterval   Int     // 时间周期 月，0 = 不按时间约束
+
+<b>AppDatabase</b>
+  version 3 → 4
+  fallbackToDestructiveMigration()   // 开发阶段直接清库重建，不写 Migration</pre>
+  <div class="box dg"><b>关于清库：</b>本次改动涉及表结构，项目当前使用 <code>fallbackToDestructiveMigration()</code>，版本号提升后旧数据库会被直接清空重建。项目仍处于开发阶段，这是既定做法；正式发版前需要补 Migration 或导出/导入兜底。</div>
+
+  <h3 style="margin:34px 0 0;font:800 16px/1.4 var(--fs);color:var(--txt)">字体</h3>
+  <ul>
+    <li><b>拉丁字母与数字</b>：内置 Manrope 可变字体（<code>res/font/manrope_variable.ttf</code>，164 KB，OFL 协议），覆盖 400 / 500 / 600 / 700 / 800 五个字重。</li>
+    <li><b>中文</b>：一律走系统字体（思源黑体 / 苹方 / 微软雅黑），App 内不内置中文字体——中文字体动辄几 MB，为一个工具型 App 不值得。</li>
+    <li>Manrope 只覆盖拉丁与数字，中文缺字时由 Android 系统字体链自动兜底。</li>
+  </ul>
+
+  <h3 style="margin:34px 0 0;font:800 16px/1.4 var(--fs);color:var(--txt)">深浅色取舍</h3>
+  <div class="box"><b>本版为单一暗色定稿，不再跟随系统深浅色切换。</b>「现代车座舱」的明暗轴就是全暗 #0A0C0F，浅色并不是这一版设计的一部分——为它另做一套浅色等于发明一个从未设计过的界面。若日后确实需要浅色，应作为一次独立任务整体设计，而不是把暗色 token 反相。</div>
+
+  <div class="foot">
+    本页为定稿设计规格。功能点以 <code>app/src/main/java/com/carmaintenance/app/ui/screen/</code> 中的实际实现为准逐条核对，未做删减。静态原型见 <code>design/prototype.html</code>。
+  </div>
+
+</div>
+</body>
+</html>

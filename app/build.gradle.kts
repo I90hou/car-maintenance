@@ -12,8 +12,8 @@ android {
         applicationId = "com.carmaintenance.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -21,8 +21,27 @@ android {
         }
     }
 
+    // 发布签名：CI 通过 -PRELEASE_STORE_FILE / -PRELEASE_STORE_PASSWORD /
+    // -PRELEASE_KEY_ALIAS / -PRELEASE_KEY_PASSWORD 注入密钥；
+    // 不传这些属性时保持未签名，本地构建行为不变。
+    val releaseStorePath = project.findProperty("RELEASE_STORE_FILE") as String?
+
+    signingConfigs {
+        create("release") {
+            if (releaseStorePath != null) {
+                storeFile = file(releaseStorePath)
+                storePassword = project.findProperty("RELEASE_STORE_PASSWORD") as String?
+                keyAlias = project.findProperty("RELEASE_KEY_ALIAS") as String?
+                keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") as String?
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (releaseStorePath != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

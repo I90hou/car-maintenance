@@ -16,11 +16,17 @@ class MaintenanceRepository(
         recordDao.getRecordsByVehicle(vehicleId)
     
     suspend fun getRecordById(id: Long): MaintenanceRecord? = recordDao.getRecordById(id)
+
+    /** 单条记录（Flow），编辑保存后自动刷新详情页 */
+    fun getRecordByIdFlow(id: Long): Flow<List<MaintenanceRecord>> = recordDao.getRecordByIdFlow(id)
     
     suspend fun getRecordsByVehicleSuspend(vehicleId: Long): List<MaintenanceRecord> =
         recordDao.getRecordsByVehicleSuspend(vehicleId)
     
     suspend fun getAllRecords(): List<MaintenanceRecord> = recordDao.getAllRecords()
+
+    /** 全部记录（Flow），用于跨车辆统计与周期推算 */
+    fun getAllRecordsFlow(): Flow<List<MaintenanceRecord>> = recordDao.getAllRecordsFlow()
     
     /** 插入保养记录，同时保存地点历史 */
     suspend fun insert(record: MaintenanceRecord): Long {

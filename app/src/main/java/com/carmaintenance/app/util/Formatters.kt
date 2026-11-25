@@ -41,6 +41,23 @@ object DateTimeFormatter {
 }
 
 /**
+ * 数字分组：千位用空格分隔（124099 → "124 099"），与界面样式一致
+ */
+object NumberFormatter {
+
+    fun format(value: Int): String {
+        val raw = value.toString()
+        if (raw.length <= 3) return raw
+        val sb = StringBuilder()
+        for ((i, c) in raw.withIndex()) {
+            if (i > 0 && (raw.length - i) % 3 == 0) sb.append(' ')
+            sb.append(c)
+        }
+        return sb.toString()
+    }
+}
+
+/**
  * 金额格式化
  */
 object CurrencyFormatter {
