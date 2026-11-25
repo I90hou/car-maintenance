@@ -10,6 +10,8 @@ on:
         description: '要发布的 tag（必须已存在，例如 v1.2.0）'
         required: true
 
+# 说明：新版本号首次发布直接推 tag；已经打过 tag 想重跑，用 Actions 页面上的
+# 「Run workflow」手动触发并填同一个 tag —— 删 tag 再重推会让 GitHub 把已有 Release 变成 draft。
 permissions:
   contents: write
 
@@ -140,7 +142,8 @@ jobs:
           esac
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$TAG" "$APK" --repo "$GITHUB_REPOSITORY" --clobber
-            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/release-notes.md"
+            # --draft=false 是必要的：删过 tag 再重推，GitHub 会把已有 Release 变成 draft
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file "$RUNNER_TEMP/release-notes.md" --draft=false
           else
             gh release create "$TAG" "$APK" \
               --repo "$GITHUB_REPOSITORY" \
@@ -148,3 +151,4 @@ jobs:
               --notes-file "$RUNNER_TEMP/release-notes.md" \
               $PRERELEASE
           fi
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json url,isDraft
