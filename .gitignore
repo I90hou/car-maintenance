@@ -17,3 +17,6 @@ app/release/
 # Keystore（不上传签名密钥）
 *.jks
 *.keystore
+
+# 发布签名材料与口令（本地留存，备份用）
+/release-signing/
