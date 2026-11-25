@@ -52,10 +52,20 @@ jobs:
 
       - name: 构建已签名的 Release APK
         env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
+          set -euo pipefail
+
+          # tag 与应用版本必须一致，否则发出去的包和版本号会对不上
+          VERSION_NAME=$(awk -F'"' '/versionName[[:space:]]*=/ { print $2; exit }' app/build.gradle.kts)
+          if [ "$VERSION_NAME" != "${TAG#v}" ]; then
+            echo "::error::tag $TAG 与 app/build.gradle.kts 的 versionName ($VERSION_NAME) 不一致"
+            exit 1
+          fi
+
           gradle assembleRelease \
             -PchinaMirror=false \
             -PRELEASE_STORE_FILE="$RUNNER_TEMP/release.keystore" \
@@ -72,17 +82,25 @@ jobs:
           VERSION="${TAG#v}"
 
           # 发布说明优先取 CHANGELOG.md 里对应的版本段，让变更日志与 Release 同一份来源
+          # 段落结束于下一个二级标题（## ）或文件末尾的链接定义区（[xxx]: ...）
           awk -v ver="$VERSION" '
             index($0, "## [" ver "]") == 1 { found = 1; next }
-            found && /^## [/ { exit }
+            found && /^## / { found = 0; next }
+            found && /^\[/ { found = 0; next }
             found { print }
           ' CHANGELOG.md > "$RUNNER_TEMP/changelog-section.md"
 
           if [ ! -s "$RUNNER_TEMP/changelog-section.md" ]; then
-            PREV_TAG=$(git tag --sort=-v:refname | grep -v "^$TAG$" | head -1 || true)
+            # CHANGELOG 里没有这一段，就退回用该 tag 之前的提交标题兜底
+            PREV_TAG=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || true)
             if [ -n "$PREV_TAG" ]; then
               git log --no-merges --pretty=format:'- %s' "$PREV_TAG..$TAG" > "$RUNNER_TEMP/changelog-section.md"
+            else
+              git log --no-merges --pretty=format:'- %s' -20 "$TAG" > "$RUNNER_TEMP/changelog-section.md"
             fi
+          else
+            # 带上文件末尾的链接定义，条目里的 [短哈希] 才会渲染成可点击的提交链接
+            grep -E '^\[[^]]+\]:' CHANGELOG.md >> "$RUNNER_TEMP/changelog-section.md" || true
           fi
 
           {
