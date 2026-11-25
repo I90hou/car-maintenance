@@ -168,8 +168,8 @@ fun VehicleManagerScreen(
 
                 Box(
                     modifier = Modifier
-                        .animateItemPlacement(
-                            animationSpec = spring(dampingRatio = 0.85f, stiffness = 700f)
+                        .animateItem(
+                            placementSpec = spring(dampingRatio = 0.85f, stiffness = 700f)
                         )
                         .onGloballyPositioned { itemBounds[vehicle.id] = it.boundsInRoot() }
                         .zIndex(if (isDragging) 10f else 1f)

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  车身侧面线稿（120 × 44 设计坐标）。
+  几何约束：
+  - 三厢比例：后备箱 4~26、车顶 44~62、引擎盖 78~100，前后悬基本对称；
+  - 两只车轮共用地平线（y = 41），轮心 (26,32)/(94,32)，轮胎半径 9；
+  - 轮拱半径 11，与轮胎同心、从门槛线 y = 34 向上切出，拱顶 (y = 21) 低于腰线，不与车身轮廓穿插；
+  - 两块车窗完全落在车顶与腰线（y = 19）之间，B 柱留 3 单位空隙；
+  - 由 Icon 的 ContentScale.Fit 等比缩放，不做非等比拉伸。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="44dp"
+    android:viewportWidth="120"
+    android:viewportHeight="44">
+
+    <path
+        android:pathData="M4,28.5 C4,25 6,23 10,22.3 L26,20.4 C30,19.6 32,17 34,13.5 C36,10 39,6 44,6 L62,6 C66,6 69,9 72,12.5 C74,14.8 76,17 78,19 L100,20.5 C107,21.3 112,23 115,25.2 C116.4,26.4 116.8,28 116.8,29.8 L116.8,34 L104.82,34 A11,11 0 0 0 83.18,34 L36.82,34 A11,11 0 0 0 15.18,34 L4,34 C2.6,33 2.2,31 4,28.5 Z"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <path
+        android:pathData="M33,19 L44,10.5 L53,10.5 L53,19 Z"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <path
+        android:pathData="M56,19 L56,10.5 L64,10.5 L76,19 Z"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <path
+        android:pathData="M17,32 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M22,32 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2" />
+
+    <path
+        android:pathData="M85,32 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0 Z"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M90,32 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0 Z"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.2" />
+</vector>

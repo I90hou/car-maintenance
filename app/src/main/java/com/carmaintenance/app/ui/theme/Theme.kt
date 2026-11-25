@@ -1,6 +1,7 @@
 package com.carmaintenance.app.ui.theme
 
 import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
@@ -347,8 +348,13 @@ fun CarMaintenanceTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = Cockpit.Background.toArgb()
-            window.navigationBarColor = Cockpit.Background.toArgb()
+            // API 35 起系统强制边到边，状态栏/导航栏颜色不再可写，这里只保留旧版本行为
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                @Suppress("DEPRECATION")
+                window.statusBarColor = Cockpit.Background.toArgb()
+                @Suppress("DEPRECATION")
+                window.navigationBarColor = Cockpit.Background.toArgb()
+            }
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
         }

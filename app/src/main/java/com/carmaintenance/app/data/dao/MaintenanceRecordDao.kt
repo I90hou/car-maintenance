@@ -14,6 +14,10 @@ interface MaintenanceRecordDao {
     @Query("SELECT * FROM maintenance_records WHERE id = :id")
     suspend fun getRecordById(id: Long): MaintenanceRecord?
 
+    /** 单条记录（Flow）：编辑保存后自动刷新，不会读到写一半的中间态 */
+    @Query("SELECT * FROM maintenance_records WHERE id = :id")
+    fun getRecordByIdFlow(id: Long): Flow<List<MaintenanceRecord>>
+
     @Query("SELECT * FROM maintenance_records WHERE vehicleId = :vehicleId ORDER BY date DESC")
     suspend fun getRecordsByVehicleSuspend(vehicleId: Long): List<MaintenanceRecord>
 

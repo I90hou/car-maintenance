@@ -18,10 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,10 +41,12 @@ import com.carmaintenance.app.data.entity.PartItem
 import com.carmaintenance.app.data.entity.RecordType
 import com.carmaintenance.app.ui.components.CockpitAlertDialog
 import com.carmaintenance.app.ui.components.CockpitCard
+import com.carmaintenance.app.ui.components.CockpitIconBadge
 import com.carmaintenance.app.ui.components.CockpitSubTopBar
 import com.carmaintenance.app.ui.components.FieldLabel
 import com.carmaintenance.app.ui.components.GroupLabel
 import com.carmaintenance.app.ui.components.HairDivider
+import com.carmaintenance.app.ui.components.partIcon
 import com.carmaintenance.app.ui.theme.AppText
 import com.carmaintenance.app.ui.theme.Cockpit
 import com.carmaintenance.app.ui.viewmodel.MaintenanceViewModel
@@ -68,17 +72,16 @@ fun RecordDetailScreen(
     onEdit: (Long) -> Unit,
     onDelete: (MaintenanceRecord) -> Unit
 ) {
-    var record by remember { mutableStateOf<MaintenanceRecord?>(null) }
-    var parts by remember { mutableStateOf<List<PartItem>>(emptyList()) }
+    // 订阅数据库而不是一次性读取：编辑保存后详情页自己刷新，
+    // 不会再出现「里程已更新、零件明细却是 0 项」的中间态。
+    val record by remember(recordId) { maintenanceViewModel.observeRecord(recordId) }
+        .collectAsStateWithLifecycle(initialValue = null)
+    val parts by remember(recordId) { maintenanceViewModel.observeParts(recordId) }
+        .collectAsStateWithLifecycle(initialValue = emptyList())
     val rules by cycleViewModel.rules.collectAsStateWithLifecycle()
     val states by cycleViewModel.states.collectAsStateWithLifecycle()
 
     var showDelete by remember { mutableStateOf(false) }
-
-    LaunchedEffect(recordId) {
-        record = maintenanceViewModel.getRecordByIdSync(recordId)
-        parts = maintenanceViewModel.getPartsByRecordSync(recordId)
-    }
 
     val loadedRecord = record
     if (loadedRecord == null) {
@@ -202,18 +205,30 @@ fun RecordDetailScreen(
                     )
                     Spacer(Modifier.height(9.dp))
                     recordCycles.take(4).forEach { cycle ->
-                        Column(modifier = Modifier.padding(bottom = 10.dp)) {
-                            Text(
-                                "${cycle.partName} · ${nextServiceReading(cycle)}",
-                                style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp),
-                                color = Cockpit.Text
+                        Row(
+                            modifier = Modifier.padding(bottom = 12.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            CockpitIconBadge(
+                                icon = partIcon(cycle.partName),
+                                tint = Cockpit.Text2,
+                                boxSize = 30.dp,
+                                iconSize = 16.dp
                             )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                nextServiceSubLine(cycle),
-                                style = AppText.Hint,
-                                color = Cockpit.Text3
-                            )
+                            Spacer(Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "${cycle.partName} · ${nextServiceReading(cycle)}",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp),
+                                    color = Cockpit.Text
+                                )
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    nextServiceSubLine(cycle),
+                                    style = AppText.Hint,
+                                    color = Cockpit.Text3
+                                )
+                            }
                         }
                     }
                 } else if (isRepair) {
@@ -233,17 +248,26 @@ fun RecordDetailScreen(
                     )
                     vehicleState?.nextCycle?.let { next ->
                         Spacer(Modifier.height(8.dp))
-                        Text(
-                            "${next.partName} · ${nextServiceReading(next)}",
-                            style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp),
-                            color = Cockpit.Text
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CockpitIconBadge(
+                                icon = partIcon(next.partName),
+                                tint = Cockpit.Text2,
+                                boxSize = 30.dp,
+                                iconSize = 16.dp
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Text(
+                                "${next.partName} · ${nextServiceReading(next)}",
+                                style = MaterialTheme.typography.titleSmall.copy(fontSize = 15.sp),
+                                color = Cockpit.Text
+                            )
+                        }
                     }
                 }
             }
 
             // ===== 车辆与位置 =====
-            GroupLabel("车辆与位置")
+            GroupLabel("车辆与位置", icon = Icons.Filled.Place)
             DetailField("车辆", vehicleState?.vehicle?.let {
                 if (it.plateNumber.isNotBlank()) "${it.displayName} · ${it.plateNumber}" else it.displayName
             } ?: "—")
@@ -252,7 +276,7 @@ fun RecordDetailScreen(
 
             // ===== 零件明细 =====
             if (parts.isNotEmpty()) {
-                GroupLabel("零件明细 · ${parts.size} 项")
+                GroupLabel("零件明细 · ${parts.size} 项", icon = Icons.Filled.Build)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -368,6 +392,13 @@ private fun PartDetailRow(part: PartItem) {
             .padding(horizontal = 15.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        CockpitIconBadge(
+            icon = partIcon(part.name),
+            tint = Cockpit.Text2,
+            boxSize = 30.dp,
+            iconSize = 16.dp
+        )
+        Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 part.name,

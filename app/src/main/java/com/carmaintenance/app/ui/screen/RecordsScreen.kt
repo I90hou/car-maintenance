@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,8 +20,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -45,8 +48,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carmaintenance.app.data.entity.MaintenanceRecord
 import com.carmaintenance.app.data.entity.PartItem
 import com.carmaintenance.app.data.entity.RecordType
+import com.carmaintenance.app.ui.components.CockpitAlertDialog
 import com.carmaintenance.app.ui.components.CockpitChip
 import com.carmaintenance.app.ui.components.EmptyState
+import com.carmaintenance.app.ui.components.recordTypeIcon
 import com.carmaintenance.app.ui.theme.AppText
 import com.carmaintenance.app.ui.theme.Cockpit
 import com.carmaintenance.app.ui.viewmodel.MaintenanceViewModel
@@ -78,6 +83,9 @@ fun RecordsScreen(
 
     val vehicle = vehicles.firstOrNull { it.id == selectedVehicleId }
     val visibleRecords = records.filter { it.vehicleId == selectedVehicleId }
+
+    // 待删除的记录：列表里的「删除」必须二次确认，避免误触直接丢数据
+    var recordToDelete by remember { mutableStateOf<MaintenanceRecord?>(null) }
 
     // 切换车辆时加载该车的记录
     LaunchedEffect(selectedVehicleId) {
@@ -168,7 +176,8 @@ fun RecordsScreen(
                 ) {
                     EmptyState(
                         title = "暂无保养记录",
-                        subtitle = "点击右下角「记一笔」为这辆车记一条"
+                        subtitle = "点击右下角「记一笔」为这辆车记一条",
+                        icon = Icons.AutoMirrored.Filled.ReceiptLong
                     )
                 }
 
@@ -182,14 +191,30 @@ fun RecordsScreen(
                         TimelineRow(
                             record = record,
                             parts = partsByRecord[record.id].orEmpty(),
+                            isFirst = index == 0,
                             isLast = index == visibleRecords.lastIndex,
                             onClick = { onOpenRecord(record.id) },
-                            onDelete = { onDeleteRecord(record) }
+                            onDelete = { recordToDelete = record }
                         )
                     }
                 }
             }
         }
+    }
+
+    // 删除二次确认：列表里的「删除」不能一点就真删
+    recordToDelete?.let { record ->
+        CockpitAlertDialog(
+            title = "删除这条记录？",
+            message = "记录 ${DateTimeFormatter.formatDate(record.date)}（${NumberFormatter.format(record.mileage)} km）将被移除，此操作不可撤销。",
+            confirmText = "确认删除",
+            danger = true,
+            onConfirm = {
+                recordToDelete = null
+                onDeleteRecord(record)
+            },
+            onDismiss = { recordToDelete = null }
+        )
     }
 }
 
@@ -211,6 +236,7 @@ private fun subtitleOf(plate: String?, model: String?, count: Int): String {
 private fun TimelineRow(
     record: MaintenanceRecord,
     parts: List<PartItem>,
+    isFirst: Boolean,
     isLast: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit
@@ -218,25 +244,50 @@ private fun TimelineRow(
     val isRepair = record.type == RecordType.REPAIR
     val nodeColor = if (isRepair) Cockpit.Danger else Cockpit.Accent
 
-    Row(modifier = Modifier.fillMaxWidth()) {
-        // 节点 + 连接线
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+    ) {
+        // 节点 + 连接线：上线补齐到上一条节点，下线填满整行，两段接起来不断口
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(14.dp)
+            modifier = Modifier
+                .width(26.dp)
+                .fillMaxHeight()
         ) {
-            Spacer(Modifier.height(14.dp))
+            if (!isFirst) {
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(14.dp)
+                        .background(Cockpit.Line2)
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            // 节点换成类型图标：保养是扳手，维修是修车，底色只做容器
             Box(
                 modifier = Modifier
-                    .size(9.dp)
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(nodeColor)
-            )
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (isRepair) Cockpit.Danger.copy(alpha = 0.16f)
+                        else Cockpit.Accent.copy(alpha = 0.16f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = recordTypeIcon(isRepair),
+                    contentDescription = null,
+                    modifier = Modifier.size(13.dp),
+                    tint = nodeColor
+                )
+            }
             if (!isLast) {
                 Box(
                     modifier = Modifier
                         .width(1.dp)
-                        .fillMaxHeight()
-                        .height(100.dp)
+                        .weight(1f)
                         .background(Cockpit.Line2)
                 )
             }

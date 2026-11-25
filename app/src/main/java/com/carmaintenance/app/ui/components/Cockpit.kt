@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
@@ -36,16 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.carmaintenance.app.R
 import com.carmaintenance.app.ui.theme.AppText
 import com.carmaintenance.app.ui.theme.Cockpit
 
@@ -56,7 +54,7 @@ import com.carmaintenance.app.ui.theme.Cockpit
  */
 enum class CockpitTab(val route: String, val label: String, val icon: ImageVector) {
     Overview("home", "概览", Icons.Default.Speed),
-    Records("records", "记录", Icons.Default.List),
+    Records("records", "记录", Icons.AutoMirrored.Filled.List),
     Settings("settings", "设置", Icons.Default.Tune)
 }
 
@@ -171,7 +169,7 @@ fun CockpitSubTopBar(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                Icons.Default.ArrowBack,
+                Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "返回",
                 modifier = Modifier.size(17.dp),
                 tint = Cockpit.Text2
@@ -201,15 +199,36 @@ fun HairDivider(modifier: Modifier = Modifier, color: Color = Cockpit.Line) {
     )
 }
 
-/** 分组小标题 */
+/**
+ * 分组小标题
+ *
+ * 可选图标：给分区一个识别符号，尺寸跟小标题字号对齐，保持安静。
+ */
 @Composable
-fun GroupLabel(text: String, modifier: Modifier = Modifier) {
-    Text(
-        text,
-        style = AppText.GroupLabel,
-        color = Cockpit.Text3,
-        modifier = modifier.padding(top = 22.dp, bottom = 10.dp)
-    )
+fun GroupLabel(
+    text: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null
+) {
+    Row(
+        modifier = modifier.padding(top = 22.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(13.dp),
+                tint = Cockpit.Text3
+            )
+            Spacer(Modifier.width(6.dp))
+        }
+        Text(
+            text,
+            style = AppText.GroupLabel,
+            color = Cockpit.Text3
+        )
+    }
 }
 
 /** 小标签（字段名、区块名） */
@@ -474,79 +493,44 @@ fun CarSilhouette(
     highlighted: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val stroke = if (highlighted) Cockpit.Accent else Cockpit.Text3
-    val body = remember {
-        Path().apply {
-            moveTo(6f, 32f)
-            cubicTo(6f, 27f, 9f, 25f, 14f, 24f)
-            lineTo(28f, 22f)
-            lineTo(40f, 13f)
-            cubicTo(42f, 11.5f, 44f, 11f, 46f, 11f)
-            lineTo(66f, 11f)
-            cubicTo(69f, 11f, 71f, 12f, 73f, 13.5f)
-            lineTo(82f, 21.5f)
-            cubicTo(87f, 22.5f, 90f, 24.5f, 90f, 29.5f)
-            lineTo(90f, 32.5f)
-            lineTo(6f, 32.5f)
-            close()
-        }
-    }
-    val glassFront = remember {
-        Path().apply {
-            moveTo(42f, 22f)
-            lineTo(52f, 15f)
-            cubicTo(53f, 14.3f, 54f, 14f, 55.5f, 14f)
-            lineTo(64f, 14f)
-            lineTo(64f, 22f)
-            close()
-        }
-    }
-    val glassRear = remember {
-        Path().apply {
-            moveTo(67f, 14f)
-            lineTo(80f, 14f)
-            cubicTo(82f, 14f, 83.5f, 14.7f, 85f, 16f)
-            lineTo(91.5f, 22f)
-            lineTo(67f, 22f)
-            close()
-        }
-    }
+    // 车身线稿走矢量资源：轮子共用地平线、车窗落在柱内，
+    // 选中/未选中只换颜色，不再用 Canvas 手绘坐标。
+    Icon(
+        painter = painterResource(R.drawable.ic_car_side),
+        contentDescription = null,
+        tint = if (highlighted) Cockpit.Accent else Cockpit.Text3,
+        modifier = modifier
+    )
+}
 
-    androidx.compose.foundation.Canvas(modifier = modifier) {
-        val sx = size.width / 120f
-        val sy = size.height / 44f
-        withTransform({
-            scale(sx, sy, pivot = androidx.compose.ui.geometry.Offset.Zero)
-        }) {
-            val lineWidth = 1.4f / sx
-            drawPath(
-                path = body,
-                color = stroke,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = lineWidth)
-            )
-            drawPath(
-                path = glassFront,
-                color = stroke.copy(alpha = 0.7f),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.1f / sx)
-            )
-            drawPath(
-                path = glassRear,
-                color = stroke.copy(alpha = 0.7f),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.1f / sx)
-            )
-            drawCircle(
-                color = stroke,
-                radius = 8f,
-                center = androidx.compose.ui.geometry.Offset(28f, 34f),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = lineWidth)
-            )
-            drawCircle(
-                color = stroke,
-                radius = 8f,
-                center = androidx.compose.ui.geometry.Offset(92f, 34f),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = lineWidth)
-            )
-        }
+/**
+ * 图标底座
+ *
+ * 圆角方块托一个图标：方块是中性底，图标颜色才表达状态，
+ * 这样整屏仍然是「深底 + 近乎无彩」，状态靠一小块颜色点出来。
+ */
+@Composable
+fun CockpitIconBadge(
+    icon: ImageVector,
+    tint: Color,
+    modifier: Modifier = Modifier,
+    boxSize: Dp = 30.dp,
+    iconSize: Dp = 16.dp,
+    background: Color = Cockpit.Surface2
+) {
+    Box(
+        modifier = modifier
+            .size(boxSize)
+            .clip(RoundedCornerShape(9.dp))
+            .background(background),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(iconSize),
+            tint = tint
+        )
     }
 }
 
@@ -556,6 +540,7 @@ fun EmptyState(
     title: String,
     subtitle: String? = null,
     modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
     action: @Composable (() -> Unit)? = null
 ) {
     Column(
@@ -564,6 +549,15 @@ fun EmptyState(
             .padding(horizontal = 32.dp, vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (icon != null) {
+            CockpitIconBadge(
+                icon = icon,
+                tint = Cockpit.Text3,
+                boxSize = 54.dp,
+                iconSize = 26.dp
+            )
+            Spacer(Modifier.height(18.dp))
+        }
         Text(
             title,
             style = MaterialTheme.typography.titleMedium,

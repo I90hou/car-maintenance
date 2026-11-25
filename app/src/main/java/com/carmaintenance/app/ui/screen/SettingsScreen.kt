@@ -25,8 +25,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -111,7 +117,6 @@ fun SettingsScreen(
             .putBoolean("auto_sync_enabled", autoSyncEnabled)
             .putInt("auto_sync_interval_min", autoSyncIntervalMin.coerceIn(1, 60))
             .apply()
-        showWebdavDetail = false
     }
 
     val csvExportLauncher = rememberLauncherForActivityResult(
@@ -163,11 +168,12 @@ fun SettingsScreen(
             ListRow(
                 title = "车辆管理",
                 subtitle = "添加、编辑和删除车辆信息",
+                icon = Icons.Filled.DirectionsCar,
                 onClick = onVehicleManager
             )
 
             // ===== 数据同步 =====
-            GroupLabel("数据同步")
+            GroupLabel("数据同步", icon = Icons.Filled.CloudSync)
             CockpitCard(padding = PaddingValues(16.dp)) {
                 Text(
                     "通过 WebDAV 将数据同步到云端，多设备共享。",
@@ -253,7 +259,9 @@ fun SettingsScreen(
                         .padding(vertical = 6.dp)
                 )
 
-                if (webdavEnabled && showWebdavDetail) {
+                // 只要展开就显示配置项：开关未打开时也能先填地址，
+                // 否则点「展开配置」只会换个文案、看不到任何字段。
+                if (showWebdavDetail) {
                     Spacer(Modifier.height(8.dp))
                     UnderlineField(
                         value = webdavUrl,
@@ -372,7 +380,7 @@ fun SettingsScreen(
             }
 
             // ===== 保养周期 =====
-            GroupLabel("保养周期")
+            GroupLabel("保养周期", icon = Icons.Filled.Autorenew)
             CockpitCard(padding = PaddingValues(16.dp)) {
                 Text(
                     "按项目设定周期，概览页据此推算下一次保养。",
@@ -411,9 +419,10 @@ fun SettingsScreen(
             }
 
             // ===== 数据 =====
-            GroupLabel("数据")
+            GroupLabel("数据", icon = Icons.Filled.TableChart)
             GhostButton(
                 text = if (isExporting) "导出中…" else "导出为 CSV",
+                icon = Icons.Filled.FileDownload,
                 onClick = {
                     if (isExporting) return@GhostButton
                     isExporting = true
@@ -447,6 +456,7 @@ private fun ListRow(
     title: String,
     subtitle: String?,
     onClick: () -> Unit,
+    icon: ImageVector? = null,
     trailing: @Composable (() -> Unit)? = null
 ) {
     Row(
@@ -456,6 +466,15 @@ private fun ListRow(
             .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = Cockpit.Text2
+            )
+            Spacer(Modifier.width(12.dp))
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 title,
@@ -815,8 +834,14 @@ fun GhostButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     primary: Boolean = false,
-    danger: Boolean = false
+    danger: Boolean = false,
+    icon: ImageVector? = null
 ) {
+    val contentTint = when {
+        primary -> Cockpit.OnAccent
+        danger -> Cockpit.Danger
+        else -> Cockpit.Text
+    }
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(999.dp),
@@ -831,18 +856,26 @@ fun GhostButton(
         },
         modifier = modifier
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(vertical = 13.dp)
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 13.dp)
         ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(15.dp),
+                    tint = contentTint
+                )
+                Spacer(Modifier.width(7.dp))
+            }
             Text(
                 text,
                 style = AppText.RowMeta.copy(fontWeight = FontWeight.ExtraBold),
-                color = when {
-                    primary -> Cockpit.OnAccent
-                    danger -> Cockpit.Danger
-                    else -> Cockpit.Text
-                }
+                color = contentTint
             )
         }
     }

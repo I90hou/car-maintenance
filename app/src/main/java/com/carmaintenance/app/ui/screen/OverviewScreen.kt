@@ -1,7 +1,6 @@
 package com.carmaintenance.app.ui.screen
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,10 +41,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.carmaintenance.app.ui.components.CockpitCard
 import com.carmaintenance.app.ui.components.CockpitChip
+import com.carmaintenance.app.ui.components.CockpitIconBadge
 import com.carmaintenance.app.ui.components.FieldLabel
 import com.carmaintenance.app.ui.components.HairDivider
 import com.carmaintenance.app.ui.components.ServiceBar
 import com.carmaintenance.app.ui.components.SyncStatusLabel
+import com.carmaintenance.app.ui.components.partIcon
 import com.carmaintenance.app.ui.theme.AppText
 import com.carmaintenance.app.ui.theme.Cockpit
 import com.carmaintenance.app.ui.viewmodel.ServiceCycleViewModel
@@ -124,6 +125,13 @@ fun OverviewScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CockpitIconBadge(
+                            icon = Icons.Filled.DirectionsCar,
+                            tint = Cockpit.Text3,
+                            boxSize = 54.dp,
+                            iconSize = 26.dp
+                        )
+                        Spacer(Modifier.height(18.dp))
                         Text(
                             "还没有添加车辆",
                             style = MaterialTheme.typography.titleMedium,
@@ -298,11 +306,11 @@ private fun NextServiceBlock(next: PartCycle?, onOpenRecords: () -> Unit) {
             .clickable(onClick = onOpenRecords),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(if (overdue) Cockpit.Danger else Cockpit.Accent)
+        CockpitIconBadge(
+            icon = partIcon(next.partName),
+            tint = if (overdue) Cockpit.Danger else Cockpit.Accent,
+            boxSize = 30.dp,
+            iconSize = 16.dp
         )
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -435,13 +443,13 @@ private fun CycleRow(
             .padding(vertical = 9.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(7.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(dotColor)
+            CockpitIconBadge(
+                icon = partIcon(cycle.partName),
+                tint = dotColor,
+                boxSize = 30.dp,
+                iconSize = 16.dp
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(10.dp))
             Text(
                 cycle.partName,
                 style = MaterialTheme.typography.titleSmall,

@@ -27,7 +27,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -285,7 +289,7 @@ fun RecordEditScreen(
             }
 
             // ===== 本次性质 =====
-            GroupLabel("本次性质", modifier = Modifier.padding(top = 4.dp))
+            GroupLabel("本次性质", modifier = Modifier.padding(top = 4.dp), icon = Icons.Filled.Tune)
             CockpitSegment(
                 options = listOf("保养", "维修"),
                 selectedIndex = if (recordType == RecordType.REPAIR) 1 else 0,
@@ -303,7 +307,7 @@ fun RecordEditScreen(
             )
 
             // ===== 基础信息 =====
-            GroupLabel("基础信息")
+            GroupLabel("基础信息", icon = Icons.Filled.Info)
             UnderlineField(
                 value = DateTimeFormatter.formatDate(date),
                 onValueChange = {},
@@ -362,7 +366,10 @@ fun RecordEditScreen(
             }
 
             // ===== 项目清单 =====
-            GroupLabel("保养项目 / 零配件" + if (partsForm.isNotEmpty()) " · ${partsForm.size} 项" else "")
+            GroupLabel(
+                "保养项目 / 零配件" + if (partsForm.isNotEmpty()) " · ${partsForm.size} 项" else "",
+                icon = Icons.Filled.Build
+            )
             if (partsForm.isEmpty()) {
                 Text(
                     "还没有添加项目，可在下方添加",
@@ -502,7 +509,7 @@ fun RecordEditScreen(
             }
 
             // ===== 工时费与备注 =====
-            GroupLabel("工时费与备注")
+            GroupLabel("工时费与备注", icon = Icons.Filled.EditNote)
             UnderlineField(
                 value = laborCostText,
                 onValueChange = { laborCostText = it.filter { c -> c.isDigit() || c == '.' } },

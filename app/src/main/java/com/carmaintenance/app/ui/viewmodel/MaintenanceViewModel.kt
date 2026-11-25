@@ -2,6 +2,7 @@ package com.carmaintenance.app.ui.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.room.withTransaction
 import androidx.lifecycle.viewModelScope
 import com.carmaintenance.app.CarMaintenanceApp
 import com.carmaintenance.app.data.DbMutex
@@ -14,7 +15,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.isActive
@@ -106,6 +109,18 @@ class MaintenanceViewModel : ViewModel() {
         return _partsByRecord.value[recordId] ?: emptyList()
     }
 
+    /**
+     * 订阅单条记录。
+     * 详情页改为订阅数据库而不是一次性读取，编辑保存后会自己刷新，
+     * 不会再出现「记录已更新但零件明细还是空的」这种中间态。
+     */
+    fun observeRecord(id: Long): Flow<MaintenanceRecord?> =
+        recordRepository.getRecordByIdFlow(id).map { it.firstOrNull() }
+
+    /** 订阅某条记录的零配件 */
+    fun observeParts(recordId: Long): Flow<List<PartItem>> =
+        partRepository.getPartsByRecordFlow(recordId)
+
     /** 添加记录及其零配件 */
     fun addRecord(
         vehicleId: Long,
@@ -157,20 +172,24 @@ class MaintenanceViewModel : ViewModel() {
                     val partsCost = parts.sumOf { it.subtotal }
                     val totalCost = partsCost + laborCost
 
-                    // 更新记录
-                    recordRepository.update(
-                        record.copy(
-                            partsCost = partsCost,
-                            laborCost = laborCost,
-                            totalCost = totalCost
+                    // 记录与零配件必须整体提交：拆成多条语句时，
+                    // 详情页可能在「删完旧件、还没插新件」的间隙读到 0 项。
+                    CarMaintenanceApp.instance.database.withTransaction {
+                        // 更新记录
+                        recordRepository.update(
+                            record.copy(
+                                partsCost = partsCost,
+                                laborCost = laborCost,
+                                totalCost = totalCost
+                            )
                         )
-                    )
 
-                    // 更新零配件：先删旧的再全量插入
-                    partRepository.deleteByRecordId(record.id)
-                    if (parts.isNotEmpty()) {
-                        val partsWithRecordId = parts.map { it.copy(recordId = record.id, id = 0) }
-                        partRepository.insertAll(partsWithRecordId)
+                        // 更新零配件：先删旧的再全量插入
+                        partRepository.deleteByRecordId(record.id)
+                        if (parts.isNotEmpty()) {
+                            val partsWithRecordId = parts.map { it.copy(recordId = record.id, id = 0) }
+                            partRepository.insertAll(partsWithRecordId)
+                        }
                     }
                 }
             } catch (e: Exception) {

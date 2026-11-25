@@ -16,6 +16,9 @@ class MaintenanceRepository(
         recordDao.getRecordsByVehicle(vehicleId)
     
     suspend fun getRecordById(id: Long): MaintenanceRecord? = recordDao.getRecordById(id)
+
+    /** 单条记录（Flow），编辑保存后自动刷新详情页 */
+    fun getRecordByIdFlow(id: Long): Flow<List<MaintenanceRecord>> = recordDao.getRecordByIdFlow(id)
     
     suspend fun getRecordsByVehicleSuspend(vehicleId: Long): List<MaintenanceRecord> =
         recordDao.getRecordsByVehicleSuspend(vehicleId)
